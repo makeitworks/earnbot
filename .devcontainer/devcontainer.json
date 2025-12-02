@@ -1,0 +1,22 @@
+{
+    "name": "earnbot",
+    "build": {
+        "dockerfile": "../infra/docker/Dockerfile.dev"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "esbenp.prettier-vscode",
+                "ms-vscode.vscode-typescript-next"
+            ]
+        }
+    },
+    "workspaceFolder": "/workspaces",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces,type=bind,consistency=cached",
+    "mounts": [
+        "source=earnbot-pnpmstore,target=/workspaces/.pnpm-store,type=volume",
+        "source=earnbot-node_modules,target=/workspaces/node_modules,type=volume",
+        "source=earnbot-api-node_modules,target=/workspaces/apps/api/node_modules,type=volume",
+        "source=earnbot-web-node_modules,target=/workspaces/apps/web/node_modules,type=volume"
+    ]
+}
