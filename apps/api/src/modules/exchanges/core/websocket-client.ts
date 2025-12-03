@@ -93,7 +93,7 @@ export abstract class BaseWebsocketClient {
       } else {
         clearInterval(interval);
       }
-    }, 30000); // 每30秒发送一次ping
+    }, 10000); // 每10秒发送一次ping
   }
 
   /**

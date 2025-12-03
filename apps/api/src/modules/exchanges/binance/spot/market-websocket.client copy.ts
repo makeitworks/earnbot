@@ -3,8 +3,8 @@ import { Ticker } from '../../common/types/ticker.type';
 import { Kline } from '../../common/types/kline.type';
 
 /**
- * Binance Spot WebSocket行情推送 客户端
- * 不需要API Key 和 Secret, 仅用于公共市场数据
+ * Binance Spot WebSocket 客户端
+ * API Key 和 Secret 可选，仅在需要用户数据流时使用
  */
 // export class BinanceSpotWebsocketClient extends BaseWebsocketClient {
 export class BinanceMarketWebsocketClient extends BaseWebsocketClient {
