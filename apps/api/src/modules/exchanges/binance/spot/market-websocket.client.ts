@@ -6,7 +6,8 @@ import { Kline } from '../../common/types/kline.type';
  * Binance Spot WebSocket 客户端
  * API Key 和 Secret 可选，仅在需要用户数据流时使用
  */
-export class BinanceSpotWebsocketClient extends BaseWebsocketClient {
+// export class BinanceSpotWebsocketClient extends BaseWebsocketClient {
+export class BinanceMarketWebsocketClient extends BaseWebsocketClient {
   private tickerCallbacks: Map<string, (ticker: Ticker) => void> = new Map();
   private klineCallbacks: Map<string, (kline: Kline) => void> = new Map();
 

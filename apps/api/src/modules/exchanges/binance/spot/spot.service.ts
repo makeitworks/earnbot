@@ -4,8 +4,8 @@ import { ProductType } from '../../common/enums/product-type.enum';
 import { Order, OrderRequest } from '../../common/types/order.type';
 import { Ticker } from '../../common/types/ticker.type';
 import { Kline } from '../../common/types/kline.type';
-import { BinanceSpotRestClient } from '../rest/spot-rest.client';
-import { BinanceSpotWebsocketClient } from '../websocket/spot-websocket.client';
+import { BinanceSpotRestClient } from './rest.client';
+import { BinanceMarketWebsocketClient } from './market-websocket.client';
 
 /**
  * Binance 现货产品服务
@@ -15,11 +15,11 @@ import { BinanceSpotWebsocketClient } from '../websocket/spot-websocket.client';
 export class BinanceSpotService implements IProduct {
   readonly productType = 'SPOT';
   private restClient: BinanceSpotRestClient;
-  private wsClient: BinanceSpotWebsocketClient;
+  private wsClient: BinanceMarketWebsocketClient;
 
   constructor(apiKey?: string, apiSecret?: string) {
     this.restClient = new BinanceSpotRestClient(apiKey, apiSecret);
-    this.wsClient = new BinanceSpotWebsocketClient(apiKey, apiSecret);
+    this.wsClient = new BinanceMarketWebsocketClient(apiKey, apiSecret);
   }
 
   /**
