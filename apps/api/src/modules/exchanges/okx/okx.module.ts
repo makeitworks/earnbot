@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { OkxService } from './okx.service';
-import { OkxSpotService } from './spot/spot.service';
 
 @Module({
-  providers: [OkxService, OkxSpotService],
+  providers: [OkxService],
   exports: [OkxService],
 })
 export class OkxModule {}
