@@ -1,22 +1,30 @@
 {
-    "name": "earnbot",
-    "build": {
-        "dockerfile": "../infra/docker/Dockerfile.dev"
-    },
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "esbenp.prettier-vscode",
-                "ms-vscode.vscode-typescript-next"
-            ]
-        }
-    },
-    "workspaceFolder": "/workspaces",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces,type=bind,consistency=cached",
-    "mounts": [
-        "source=earnbot-pnpmstore,target=/workspaces/.pnpm-store,type=volume",
-        "source=earnbot-node_modules,target=/workspaces/node_modules,type=volume",
-        "source=earnbot-api-node_modules,target=/workspaces/apps/api/node_modules,type=volume",
-        "source=earnbot-web-node_modules,target=/workspaces/apps/web/node_modules,type=volume"
-    ]
+  "name": "earnbot",
+  "build": {
+    "dockerfile": "../infra/docker/Dockerfile.dev"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ]
+    }
+  },
+  "workspaceFolder": "/workspaces",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces,type=bind,consistency=cached",
+  "mounts": [
+    "source=earnbot-pnpmstore,target=/workspaces/.pnpm-store,type=volume",
+    "source=earnbot-node_modules,target=/workspaces/node_modules,type=volume",
+    "source=earnbot-api-node_modules,target=/workspaces/apps/api/node_modules,type=volume",
+    "source=earnbot-web-node_modules,target=/workspaces/apps/web/node_modules,type=volume"
+  ],
+  "containerEnv": {
+    "HTTP_PROXY": "http://host.docker.internal:7897",
+    "HTTPS_PROXY": "http://host.docker.internal:7897",
+    "ALL_PROXY": "http://host.docker.internal:7897",
+    "NO_PROXY": "localhost,127.0.0.1"
+  }
 }
