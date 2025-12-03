@@ -4,6 +4,7 @@ import WebSocket from 'ws';
 /**
  * WebSocket 客户端基类
  * 提供 WebSocket 连接的通用功能
+ * API Key 和 Secret 可选，仅在需要用户数据流时使用
  */
 export abstract class BaseWebsocketClient {
   protected logger = new Logger(this.constructor.name);
@@ -13,12 +14,15 @@ export abstract class BaseWebsocketClient {
   protected reconnectDelay = 3000; // 3秒
   protected subscriptions: Map<string, (data: any) => void> = new Map();
   protected isManualClose = false;
+  protected hasCredentials: boolean;
 
   constructor(
     protected baseUrl: string,
-    protected apiKey: string,
-    protected apiSecret: string,
-  ) {}
+    protected apiKey?: string,
+    protected apiSecret?: string,
+  ) {
+    this.hasCredentials = !!(apiKey && apiSecret);
+  }
 
   /**
    * 连接到WebSocket服务器

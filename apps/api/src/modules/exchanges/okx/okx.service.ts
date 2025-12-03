@@ -8,15 +8,16 @@ import { OkxSpotService } from './spot/spot.service';
 /**
  * OKX 交易所主服务
  * 提供对所有 OKX 产品的访问
+ * API 凭证可选，用户可以获取公开市场数据而不需要凭证
  */
 @Injectable()
 export class OkxService extends BaseExchange implements IExchange {
   readonly name = 'OKX';
-  private apiKey: string;
-  private apiSecret: string;
-  private passphrase: string;
+  private apiKey?: string;
+  private apiSecret?: string;
+  private passphrase?: string;
 
-  constructor(apiKey: string, apiSecret: string, passphrase: string) {
+  constructor(apiKey?: string, apiSecret?: string, passphrase?: string) {
     super();
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;

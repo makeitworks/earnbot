@@ -4,16 +4,19 @@ import axios, { AxiosInstance } from 'axios';
 /**
  * REST API 客户端基类
  * 提供 HTTP 请求的通用功能和处理
+ * API Key 和 Secret 可选，仅在需要签名的请求时使用
  */
 export abstract class BaseRestClient {
   protected logger = new Logger(this.constructor.name);
   protected client: AxiosInstance;
+  protected hasCredentials: boolean;
 
   constructor(
     protected baseUrl: string,
-    protected apiKey: string,
-    protected apiSecret: string,
+    protected apiKey?: string,
+    protected apiSecret?: string,
   ) {
+    this.hasCredentials = !!(apiKey && apiSecret);
     this.client = axios.create({
       baseURL: this.baseUrl,
       timeout: 10000,

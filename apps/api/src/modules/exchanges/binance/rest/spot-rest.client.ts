@@ -5,9 +5,10 @@ import * as crypto from 'crypto';
 
 /**
  * Binance Spot REST API 客户端
+ * API Key 和 Secret 可选，仅在需要签名的请求时使用
  */
 export class BinanceSpotRestClient extends BaseRestClient {
-  constructor(apiKey: string, apiSecret: string) {
+  constructor(apiKey?: string, apiSecret?: string) {
     super('https://api.binance.com/api/v3', apiKey, apiSecret);
   }
 

@@ -9,6 +9,7 @@ import { OkxSpotWebsocketClient } from '../websocket/spot-websocket.client';
 
 /**
  * OKX 现货产品服务
+ * API 凭证可选，用户可以获取公开市场数据而不需要凭证
  */
 @Injectable()
 export class OkxSpotService implements IProduct {
@@ -16,7 +17,7 @@ export class OkxSpotService implements IProduct {
   private restClient: OkxSpotRestClient;
   private wsClient: OkxSpotWebsocketClient;
 
-  constructor(apiKey: string, apiSecret: string, passphrase: string) {
+  constructor(apiKey?: string, apiSecret?: string, passphrase?: string) {
     this.restClient = new OkxSpotRestClient(apiKey, apiSecret, passphrase);
     this.wsClient = new OkxSpotWebsocketClient(apiKey, apiSecret, passphrase);
   }

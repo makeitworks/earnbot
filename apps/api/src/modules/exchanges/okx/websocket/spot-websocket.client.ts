@@ -4,14 +4,15 @@ import { Kline } from '../../common/types/kline.type';
 
 /**
  * OKX Spot WebSocket 客户端
+ * API Key、Secret 和 Passphrase 可选，仅在需要用户数据流时使用
  */
 export class OkxSpotWebsocketClient extends BaseWebsocketClient {
-  constructor(apiKey: string, apiSecret: string, passphrase: string) {
+  private passphrase?: string;
+
+  constructor(apiKey?: string, apiSecret?: string, passphrase?: string) {
     super('wss://ws.okx.com:8443/ws/v5/public', apiKey, apiSecret);
     this.passphrase = passphrase;
   }
-
-  private passphrase: string;
 
   /**
    * 订阅行情数据

@@ -9,6 +9,7 @@ import { BinanceSpotWebsocketClient } from '../websocket/spot-websocket.client';
 
 /**
  * Binance 现货产品服务
+ * API 凭证可选，用户可以获取公开市场数据而不需要凭证
  */
 @Injectable()
 export class BinanceSpotService implements IProduct {
@@ -16,7 +17,7 @@ export class BinanceSpotService implements IProduct {
   private restClient: BinanceSpotRestClient;
   private wsClient: BinanceSpotWebsocketClient;
 
-  constructor(apiKey: string, apiSecret: string) {
+  constructor(apiKey?: string, apiSecret?: string) {
     this.restClient = new BinanceSpotRestClient(apiKey, apiSecret);
     this.wsClient = new BinanceSpotWebsocketClient(apiKey, apiSecret);
   }

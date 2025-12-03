@@ -5,14 +5,15 @@ import * as crypto from 'crypto';
 
 /**
  * OKX Spot REST API 客户端
+ * API Key、Secret 和 Passphrase 可选，仅在需要签名的请求时使用
  */
 export class OkxSpotRestClient extends BaseRestClient {
-  constructor(apiKey: string, apiSecret: string, passphrase: string) {
+  private passphrase?: string;
+
+  constructor(apiKey?: string, apiSecret?: string, passphrase?: string) {
     super('https://www.okx.com/api/v5', apiKey, apiSecret);
     this.passphrase = passphrase;
   }
-
-  private passphrase: string;
 
   /**
    * 获取行情数据

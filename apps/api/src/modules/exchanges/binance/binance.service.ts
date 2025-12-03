@@ -8,12 +8,13 @@ import { BinanceSpotService } from './spot/spot.service';
 /**
  * Binance 交易所主服务
  * 提供对所有 Binance 产品的访问
+ * API 凭证可选，用户可以获取公开市场数据而不需要凭证
  */
 @Injectable()
 export class BinanceService extends BaseExchange implements IExchange {
   readonly name = 'Binance';
 
-  constructor(apiKey: string, apiSecret: string) {
+  constructor(apiKey?: string, apiSecret?: string) {
     super();
 
     // 注册现货产品
