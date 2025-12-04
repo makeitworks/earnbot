@@ -1,3 +1,4 @@
+import { DepthLevelEnum, DepthUpdateSpeedEnum, KlineIntervalEnum } from '../enums/binance/spot-websocket-api.enum';
 import { Order, OrderRequest } from '../types/order.type';
 import { IMarketData } from './market-data.interface';
 
@@ -46,14 +47,26 @@ export interface IProduct extends IMarketData {
    */
   subscribeTicker(symbols: string[], callback: (ticker: any) => void): Promise<void>;
 
+
+  /**
+   * WebSocket 订阅成交
+   */
+  subscribeTrade(symbols: string[], calllback: (trade: any) => void): Promise<void>;
+
   /**
    * WebSocket 订阅K线
    */
-  subscribeKline(
-    symbols: string[],
-    interval: string,
-    callback: (kline: any) => void,
-  ): Promise<void>;
+  subscribeKline(symbols: string[], interval: KlineIntervalEnum, callback: (kline: any) => void): Promise<void>;
+
+  /**
+   * WebSocket 订阅均价
+   */
+  subscribeAvgPrice(symbols: string[], callback: (data: any) => void): Promise<void>;
+
+  /**
+   * WebSocket 订阅深度 
+   */
+  subscribeDepth(symbols: string[], level: DepthLevelEnum, speed: DepthUpdateSpeedEnum, callback: (data: any) => void): Promise<void>;
 
   /**
    * WebSocket 订阅订单更新

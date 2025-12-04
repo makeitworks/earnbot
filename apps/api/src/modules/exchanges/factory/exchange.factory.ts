@@ -1,7 +1,7 @@
 import { ProductType } from '../common/enums/product-type.enum';
 import { IExchange } from '../common/interfaces/exchange.interface';
 import { BinanceService } from '../binance/binance.service';
-import { OkxService } from '../okx/okx.service';
+// import { OkxService } from '../okx/okx.service';
 
 /**
  * 交易所类型
@@ -44,7 +44,8 @@ export class ExchangeFactory {
         return new BinanceService(apiKey, apiSecret);
       case ExchangeType.OKX:
         // OKX 如果提供了凭证，则 passphrase 是可选的，但如果提供 apiKey，建议也提供 passphrase
-        return new OkxService(apiKey, apiSecret, passphrase);
+        // return new OkxService(apiKey, apiSecret, passphrase);
+        throw new Error(`Unknown exchange type: ${exchangeType}`)
       default:
         throw new Error(`Unknown exchange type: ${exchangeType}`);
     }

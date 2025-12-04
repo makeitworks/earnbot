@@ -1,4 +1,9 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('markets')
-export class MarketsController {}
+export class MarketsController {
+    @Get()
+    getEnvTest() {
+        return process.env.WANT;
+    }
+}

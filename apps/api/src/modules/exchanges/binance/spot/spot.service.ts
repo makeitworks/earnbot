@@ -6,6 +6,7 @@ import { Ticker } from '../../common/types/ticker.type';
 import { Kline } from '../../common/types/kline.type';
 import { BinanceSpotRestClient } from './rest.client';
 import { BinanceMarketWebsocketClient } from './market-websocket.client';
+import { DepthLevelEnum, DepthUpdateSpeedEnum, KlineIntervalEnum } from '../../common/enums/binance/spot-websocket-api.enum';
 
 /**
  * Binance 现货产品服务
@@ -116,7 +117,17 @@ export class BinanceSpotService implements IProduct {
     symbols: string[],
     callback: (ticker: Ticker) => void,
   ): Promise<void> {
-    // return this.wsClient.subscribeTicker(symbols, callback);
+    return this.wsClient.subscribeTicker(symbols, callback);
+  }
+
+  /**
+   * WebSocket 订阅成交
+   */
+  async subscribeTrade(
+    symbols: string[],
+    callback: (trade: any) => void,
+  ): Promise<void> {
+    return this.wsClient.subscribeTrade(symbols, callback);
   }
 
   /**
@@ -124,17 +135,41 @@ export class BinanceSpotService implements IProduct {
    */
   async subscribeKline(
     symbols: string[],
-    interval: string,
+    interval: KlineIntervalEnum,
     callback: (kline: Kline) => void,
   ): Promise<void> {
-    // return this.wsClient.subscribeKline(symbols, interval, callback);
+    return this.wsClient.subscribeKline(symbols, interval, callback);
+  }
+
+  /**
+   * WebSocket 订阅均价
+   */
+  async subscribeAvgPrice(
+    symbols: string[],
+    callback: (data: any) => void,
+  ): Promise<void> {
+    return this.wsClient.subscribeAvgPrice(symbols, callback);
+  }
+
+  /**
+   * WebSocket 订阅深度
+   */
+  async subscribeDepth(
+    symbols: string[],
+    level: DepthLevelEnum,
+    speed: DepthUpdateSpeedEnum,
+    callback: (data: any) => void,
+  ): Promise<void> {
+    return this.wsClient.subscribeDepth(symbols, level, speed, callback);
   }
 
   /**
    * WebSocket 订阅订单更新
    */
   async subscribeOrders(callback: (order: Order) => void): Promise<void> {
-    // TODO: 实现订单更新订阅
+    if (typeof (this.wsClient as any).subscribeOrders == 'function') {
+      return (this.wsClient as any).subscribeOrders(callback);
+    }
     throw new Error('Method not implemented');
   }
 

@@ -1,11 +1,17 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MarketsModule } from './modules/markets/markets.module';
 import { ExchangesModule } from './modules/exchanges/exchanges.module';
 import { EventModule } from './modules/event/event.module';
 
 
 @Module({
-  imports: [MarketsModule, ExchangesModule, EventModule],
+  imports: [
+    ConfigModule.forRoot(),
+    MarketsModule, 
+    ExchangesModule, 
+    EventModule
+  ],
   controllers: [],
   providers: [],
 })
