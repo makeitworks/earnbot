@@ -28,9 +28,9 @@ export class BinanceMarketWebsocketClient extends BaseWebsocketClient {
 
     symbols.forEach((symbol) => {
       const stream = `${symbol.toLowerCase()}@ticker`;
-      this.subscribe(stream, (data) => {
-        callback(this.transformTicker(data));
-      });
+      // this.subscribe(stream, (data) => {
+      //   callback(this.transformTicker(data));
+      // });
       this.tickerCallbacks.set(symbol, callback);
     });
   }
@@ -49,9 +49,9 @@ export class BinanceMarketWebsocketClient extends BaseWebsocketClient {
 
     symbols.forEach((symbol) => {
       const stream = `${symbol.toLowerCase()}@klines_${interval}`;
-      this.subscribe(stream, (data) => {
-        callback(this.transformKline(data.k));
-      });
+      // this.subscribe(stream, (data) => {
+      //   callback(this.transformKline(data.k));
+      // });
       this.klineCallbacks.set(`${symbol}:${interval}`, callback);
     });
   }

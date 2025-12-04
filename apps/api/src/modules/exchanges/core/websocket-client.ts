@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import WebSocket from 'ws';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * WebSocket 客户端基类
@@ -25,6 +26,13 @@ export abstract class BaseWebsocketClient {
   }
 
   /**
+   * 生成唯一标识符
+   */
+  protected generateUUID(): string {
+    return uuidv4();
+  }
+
+  /**
    * 连接到WebSocket服务器
    */
   protected async connect(): Promise<void> {
@@ -42,6 +50,10 @@ export abstract class BaseWebsocketClient {
         this.ws.on('message', (data: WebSocket.Data) => {
           this.handleMessage(data);
         });
+
+        this.ws.on('ping', (data: Buffer) => {
+          this.handlePing(data);
+        })
 
         this.ws.on('error', (error) => {
           this.logger.error('WebSocket error:', error);
@@ -65,20 +77,15 @@ export abstract class BaseWebsocketClient {
    */
   protected abstract handleMessage(data: WebSocket.Data): void;
 
-  /**
-   * 订阅消息
-   */
-  protected subscribe(topic: string, callback: (data: any) => void): void {
-    this.subscriptions.set(topic, callback);
-    this.logger.log(`Subscribed to ${topic}`);
-  }
 
   /**
-   * 取消订阅
+   * 处理 ping 消息，自动响应 pong
+   * @param data Buffer
    */
-  protected unsubscribe(topic: string): void {
-    this.subscriptions.delete(topic);
-    this.logger.log(`Unsubscribed from ${topic}`);
+  protected handlePing(data: Buffer): void {
+    if(this.isConnected()) {
+      this.ws!.pong();
+    }
   }
 
   /**

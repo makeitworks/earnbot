@@ -2,6 +2,7 @@ import { BaseRestClient } from '../../core/rest-client';
 import { Ticker } from '../../common/types/ticker.type';
 import { Kline } from '../../common/types/kline.type';
 import * as crypto from 'crypto';
+import { BinanceSpotRestApiEnum } from '../../common/enums/binance/spot-rest-api.enum';
 
 /**
  * Binance Spot REST API 客户端
@@ -9,7 +10,7 @@ import * as crypto from 'crypto';
  */
 export class BinanceSpotRestClient extends BaseRestClient {
   constructor(apiKey?: string, apiSecret?: string) {
-    super('https://api.binance.com/api/v3', apiKey, apiSecret);
+    super('https://api.binance.com', apiKey, apiSecret);
   }
 
   /**
@@ -46,7 +47,7 @@ export class BinanceSpotRestClient extends BaseRestClient {
    * 获取交易对信息
    */
   async getSymbolInfo(symbol: string): Promise<Record<string, any>> {
-    const data = await this.get('/exchangeInfo', { symbol });
+    const data = await this.get(BinanceSpotRestApiEnum.EXCHANGE_INFO, { symbol });
     return data.symbols?.[0] || null;
   }
 
@@ -54,7 +55,7 @@ export class BinanceSpotRestClient extends BaseRestClient {
    * 获取所有交易对信息
    */
   async getExchangeInfo(): Promise<Record<string, any>> {
-    return this.get('/exchangeInfo');
+    return this.get(BinanceSpotRestApiEnum.EXCHANGE_INFO);
   }
 
   /**

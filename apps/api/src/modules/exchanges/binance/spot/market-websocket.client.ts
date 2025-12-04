@@ -1,60 +1,64 @@
 import { BaseWebsocketClient } from '../../core/websocket-client';
 import { Ticker } from '../../common/types/ticker.type';
 import { Kline } from '../../common/types/kline.type';
+import { BinanceSpotWebsocketApiEnum, BinanceStreamType } from '../../common/enums/binance/spot-websocket-api.enum';
+
 
 /**
  * Binance Spot WebSocket行情推送 客户端
  * 不需要API Key 和 Secret, 仅用于公共市场数据
  */
-// export class BinanceSpotWebsocketClient extends BaseWebsocketClient {
 export class BinanceMarketWebsocketClient extends BaseWebsocketClient {
-  private tickerCallbacks: Map<string, (ticker: Ticker) => void> = new Map();
-  private klineCallbacks: Map<string, (kline: Kline) => void> = new Map();
-
-  constructor(apiKey?: string, apiSecret?: string) {
-    super('wss://stream.binance.com:9443/ws', apiKey, apiSecret);
+  
+  constructor() {
+    super('wss://stream.binance.com:9443/ws');
   }
 
   /**
-   * 订阅行情数据
+   * 订阅数据流
+   * @param symbol 
+   * @param endPoint 
+   * @param callback 
    */
-  async subscribeTicker(
-    symbols: string[],
-    callback: (ticker: Ticker) => void,
-  ): Promise<void> {
-    if (!this.isConnected()) {
+  async subscribe(symbol: string, endPoint: BinanceSpotWebsocketApiEnum, callback: (data: any) => void) : Promise<void> {
+    if(!this.isConnected()) {
       await this.connect();
     }
 
-    symbols.forEach((symbol) => {
-      const stream = `${symbol.toLowerCase()}@ticker`;
-      this.subscribe(stream, (data) => {
-        callback(this.transformTicker(data));
-      });
-      this.tickerCallbacks.set(symbol, callback);
-    });
+    const params = `${symbol.toLowerCase()}${endPoint}`;
+    const requestId = `${params}_${this.generateUUID()}`;
+
+    const payload : Record<string, any> = {
+      method: BinanceStreamType.SUBSCRIBE,
+      params: [params],
+      id: requestId,
+    }
+
+    this.subscriptions.set(requestId, callback);
+    this.send(payload);
   }
 
   /**
-   * 订阅K线数据
+   * 取消订阅数据流
+   * @param symbol 
+   * @param endPoint 
+   * @param callback 
    */
-  async subscribeKline(
-    symbols: string[],
-    interval: string,
-    callback: (kline: Kline) => void,
-  ): Promise<void> {
-    if (!this.isConnected()) {
+  async unsubscribe(symbol: string, endPoint: BinanceSpotWebsocketApiEnum, callback: (data: any) => void) : Promise<void> {
+    if(!this.isConnected()) {
       await this.connect();
+    } 
+    const params = `${symbol.toLowerCase()}${endPoint}`;
+    const requestId = `${params}_${this.generateUUID()}`;
+    const payload : Record<string, any> = {
+      method: BinanceStreamType.UNSUBSCRIBE,
+      params: [params],
+      id: requestId,
     }
-
-    symbols.forEach((symbol) => {
-      const stream = `${symbol.toLowerCase()}@klines_${interval}`;
-      this.subscribe(stream, (data) => {
-        callback(this.transformKline(data.k));
-      });
-      this.klineCallbacks.set(`${symbol}:${interval}`, callback);
-    });
+    this.subscriptions.set(requestId, callback);
+    this.send(payload);
   }
+
 
   /**
    * 处理收到的消息
@@ -73,6 +77,8 @@ export class BinanceMarketWebsocketClient extends BaseWebsocketClient {
       this.logger.error('Failed to handle message:', error);
     }
   }
+
+  
 
   /**
    * 转换行情数据

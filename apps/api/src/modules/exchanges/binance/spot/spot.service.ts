@@ -13,13 +13,13 @@ import { BinanceMarketWebsocketClient } from './market-websocket.client';
  */
 @Injectable()
 export class BinanceSpotService implements IProduct {
-  readonly productType = 'SPOT';
+  readonly productType = ProductType.SPOT;
   private restClient: BinanceSpotRestClient;
   private wsClient: BinanceMarketWebsocketClient;
 
   constructor(apiKey?: string, apiSecret?: string) {
     this.restClient = new BinanceSpotRestClient(apiKey, apiSecret);
-    this.wsClient = new BinanceMarketWebsocketClient(apiKey, apiSecret);
+    this.wsClient = new BinanceMarketWebsocketClient();
   }
 
   /**
@@ -116,7 +116,7 @@ export class BinanceSpotService implements IProduct {
     symbols: string[],
     callback: (ticker: Ticker) => void,
   ): Promise<void> {
-    return this.wsClient.subscribeTicker(symbols, callback);
+    // return this.wsClient.subscribeTicker(symbols, callback);
   }
 
   /**
@@ -127,7 +127,7 @@ export class BinanceSpotService implements IProduct {
     interval: string,
     callback: (kline: Kline) => void,
   ): Promise<void> {
-    return this.wsClient.subscribeKline(symbols, interval, callback);
+    // return this.wsClient.subscribeKline(symbols, interval, callback);
   }
 
   /**
