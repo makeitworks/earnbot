@@ -17,7 +17,6 @@ export class BinanceSpotRestClient extends BaseRestClient {
     }).toString();
 
     const signature = crypto.createHmac("sha256", apiSecret).update(queryString).digest("hex");
-
     return { ...params, timestamp, signature }
    }
 

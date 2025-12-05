@@ -4,28 +4,16 @@ import { BinanceSpotMarketWsClient } from './market.ws.client';
 
 import { OrderType, SpotRestApi, TradeStatus } from '../../../common/enums/binance.enums';
 
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { BinanceSpotSymbolInfo } from '../dto/spot.dtos';
 
 @Injectable()
 export class BinanceSpotService {
   constructor(
     private readonly restClient: BinanceSpotRestClient,
-    private readonly marketWsClient: BinanceSpotMarketWsClient,
-  ) {}
+    private readonly marketWsClient: BinanceSpotMarketWsClient
+  ) { }
 
   private readonly logger = new Logger(BinanceSpotService.name);
-
-  /**
-   * 枚5分钟刷新基差套利交易对
-   */
-  // @Cron(CronExpression.EVERY_5_MINUTES)
-  // async freshBasisArbitragePair() {
-  //   // 获取所有交易对
-  //   let allTradingPairs = await this.getExchangeInfo()
-
-  // }
-
 
   private transformSpotSymbolInfo(s: Record<string, any>): BinanceSpotSymbolInfo {
     let d: BinanceSpotSymbolInfo = {
@@ -37,7 +25,7 @@ export class BinanceSpotService {
       quoteAssetPrecision: s.quoteAssetPrecision,
       baseCommissionPrecision: s.baseCommissionPrecision,
       quoteCommissionPrecision: s.quoteCommissionPrecision,
-      orderTypes: s.orderTypes as OrderType[]      
+      orderTypes: s.orderTypes as OrderType[]
     }
     return d;
   }
@@ -45,12 +33,18 @@ export class BinanceSpotService {
   /**
    * 获取所有交易对信息
    */
-  async getAllPairs(): Promise<BinanceSpotSymbolInfo[]> {
-    let exchangeInfo = await this.restClient.get(SpotRestApi.EXCHANGE_INFO, {
+  async getPairsFromEx(symbols?: string[]): Promise<BinanceSpotSymbolInfo[]> {
+    let params: any = {
       showPermissionSets: false,
-    });
-    return exchangeInfo.symbols.map( symbol => this.transformSpotSymbolInfo(symbol) );
+    }
+    if (symbols && symbols.length > 0) {
+      params.symbols = [];
+      symbols.forEach(symbol => params.push(symbol))
+    }
+
+    let exchangeInfo = await this.restClient.get(SpotRestApi.EXCHANGE_INFO, params);
+    return exchangeInfo.symbols.map(symbol => this.transformSpotSymbolInfo(symbol))
   }
 
-  
+
 }
