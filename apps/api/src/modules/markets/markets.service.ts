@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BinanceService } from '../binance/binance.service';
+import { BinanceSpotService } from '../binance/spot/spot.service';
+
 
 @Injectable()
 export class MarketsService {
     private readonly logger = new Logger(MarketsService.name);
     
-    constructor(private readonly binanceService: BinanceService) {}
+    constructor(private readonly binanceSpotService: BinanceSpotService) {}
 
 
 }

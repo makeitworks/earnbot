@@ -17,6 +17,8 @@ export abstract class BaseRestClient {
     });
   }
 
+  protected abstract signRequest(params: Record<string,any>, apiSecret: string): Record<string,any>;
+
   /**
    * GET 请求
    */

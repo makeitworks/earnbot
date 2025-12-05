@@ -11,4 +11,6 @@ export class BinanceSpotMarketWsClient extends BaseWebsocketClient {
     protected handleMessage(data: Data): void {
         
     }
+
+    
 }
