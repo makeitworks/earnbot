@@ -15,15 +15,8 @@ export abstract class BaseWebsocketClient {
   protected reconnectDelay = 3000; // 3秒
   protected subscriptions: Map<string, (data: any) => void> = new Map();
   protected isManualClose = false;
-  protected hasCredentials: boolean;
 
-  constructor(
-    protected baseUrl: string,
-    protected apiKey?: string,
-    protected apiSecret?: string,
-  ) {
-    this.hasCredentials = !!(apiKey && apiSecret);
-  }
+  constructor(protected baseUrl: string) {}
 
   /**
    * 生成唯一标识符
