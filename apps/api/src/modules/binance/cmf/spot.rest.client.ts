@@ -3,7 +3,7 @@ import { BaseRestClient } from "../../../common/http/base-rest-client";
 import * as crypto from 'crypto';
 
 @Injectable()
-export class BinanceCMFutureRestClient extends BaseRestClient {
+export class BinanceCMFRestClient extends BaseRestClient {
   constructor() {
     super('https://dapi.binance.com');
   }

@@ -16,7 +16,79 @@ export abstract class BaseWebsocketClient {
   protected subscriptions: Map<string, (data: any) => void> = new Map();
   protected isManualClose = false;
 
-  constructor(protected baseUrl: string) {}
+  protected onOpenCallback: () => void;
+  protected onCloseCallback: () => void;
+
+  constructor(protected baseUrl: string) { }
+
+  /**
+   * 初始化，调用connect连接服务器
+   */
+  public initialize(): void {
+    this.connect();
+  }
+
+  /**
+   * 处理收到的消息
+   */
+  protected abstract handleMessage(data: WebSocket.Data): void;
+
+
+  public registerOpenCloseCallbacks(onOpen: () => void, onClose: () => void) {
+    this.onOpenCallback = onOpen;
+    this.onCloseCallback = onClose;
+  }
+
+  /** 
+   * websocket连接
+  */
+  protected onOpen(): void {
+    if (this.onOpenCallback) {
+      this.onOpenCallback();
+    } else {
+      throw new Error("no onOpen callback registered!");
+    }
+  }
+
+  /**
+   * websocket断开事件
+   */
+  protected onClose(): void {
+    if (this.onCloseCallback) {
+      this.onCloseCallback();
+    } else {
+      throw new Error("no onClose callback registered!");
+    }
+  }
+
+  /**
+   * 订阅
+   */
+  public subscribe(streamName: string, payload: Record<string, any>, callback: (data: any) => void): void {
+    let sendMsg: Record<string, any> = {
+      method: "SUBSCRIBE",
+      ...payload,
+      id: this.generateUUID(),
+    }
+    this.send(sendMsg)
+    this.subscriptions.set(streamName, callback)
+    this.logger.log(`subscribe ${streamName}`)
+  }
+
+  /**
+   * 取消订阅
+   */
+  public unsubscribe(streamName: string, payload: Record<string, any>): void {
+    let sendMsg: Record<string, any> = {
+      method: 'UNSUBSCRIBE',
+      ...payload,
+      id: this.generateUUID()
+    };
+    this.send(sendMsg);
+    this.subscriptions.delete(streamName);
+
+    this.logger.log(`unsubscribe ${streamName}`)
+  }
 
   /**
    * 生成唯一标识符
@@ -35,6 +107,7 @@ export abstract class BaseWebsocketClient {
 
         this.ws.on('open', () => {
           this.logger.log('WebSocket connected');
+          this.onOpen();
           this.reconnectAttempts = 0;
           this.setupPing();
           resolve();
@@ -55,6 +128,7 @@ export abstract class BaseWebsocketClient {
 
         this.ws.on('close', () => {
           this.logger.log('WebSocket closed');
+          this.onClose();
           if (!this.isManualClose) {
             this.reconnect();
           }
@@ -66,17 +140,11 @@ export abstract class BaseWebsocketClient {
   }
 
   /**
-   * 处理收到的消息
-   */
-  protected abstract handleMessage(data: WebSocket.Data): void;
-
-
-  /**
    * 处理 ping 消息，自动响应 pong
    * @param data Buffer
    */
   protected handlePing(data: Buffer): void {
-    if(this.isConnected()) {
+    if (this.isConnected()) {
       this.ws!.pong();
     }
   }

@@ -31,6 +31,23 @@ export enum OrderType {
     LIMIT_MAKER = 'LIMIT_MAKER' // 限价做市单
 }
 
+// 合约类型
+export enum ContractType {
+    PERPETUAL = 'PERPETUAL', // 永续合约
+    CURRENT_QUARTER = 'CURRENT_QUARTER', //当季合约
+    NEXT_QUARTER = 'NEXT_QUARTER', // 次季合约
+}
+
+// 合约状态
+export enum ContractStatus {
+    PENDING_TRADING = 'PENDING_TRADING', //待上市
+    TRADING = 'TRADING', //交易中
+    PRE_DELIVERING = 'PRE_DELIVERING', // 预结算
+    DELIVERING = 'DELIVERING', // 交割中
+    DELIVERED = 'DELIVERED', // 已交割
+}
+
+
 // 订单返回类型
 export enum NewOrderRespType {
     ACK = 'ACK',
@@ -44,13 +61,94 @@ export enum OrderSide {
     SELL = 'SELL',  // 卖出
 }
 
+export enum PositionSide {
+    BOTH = 'BOTH', // 单一持仓方向
+    LONG = 'LONG',  // 多头(双向持仓下)
+    SHORT = 'SHORT', // 空头(双向持仓下)
+}
+
 // 生效时间,订单在失效前的有效时间
 export enum TimeInForce {
     GTC = 'GTC', // 成交为止,订单会一直有效，直到被成交或者取消。
     IOC = 'IOC', // 无法立即成交的部分就撤销,订单在失效前会尽量多的成交
-    FOK = 'FOK', // 无法全部立即成交就撤销,如果无法全部成交，订单会失效。
+    FOK = 'FOK', // 无法全部立即成交就撤销,如果无法全部成交，订单会失效
+    GTX = 'GTX', // 无法成为挂单方就撤销
 }
 
+// 现货REST API
 export enum SpotRestApi {
     EXCHANGE_INFO = '/api/v3/exchangeInfo' // 交易规范信息
+}
+
+// 现货WS API
+export const SpotWsApi = {
+  // 归集交易
+  AGG_TRADE : {
+    NAME: 'aggTrade',
+    ENDPOINT: 'aggTrade'
+  },
+  // 逐笔交易
+  TRADE : {
+    NAME: 'trade',
+    ENDPOINT: 'trade'
+  },
+  KLINE: {
+    NAME: 'kline',
+    ENDPOINT: 'kline', 
+  },
+  MINI_TICKER: {
+    NAME: '24hrMiniTicker',
+    ENDPOINT: 'miniTicker'
+  },
+  MINI_ALL_TICKER: {
+    NAME: '24hrMiniTicker',
+    ENDPOINT: '!miniTicker@arr'
+  },
+  TICKER: {
+    NAME: '24hrTicker',
+    ENDPOINT: 'ticker'
+  },
+  BOOK_TICKER: {
+    NAME: 'bookTicker',
+    ENDPOINT: 'bookTicker'
+  },
+  AVG_PRICE: {
+    NAME: 'avgPrice',
+    ENDPOINT: 'avgPrice'
+  },
+  DEPTH: {
+    NAME: 'depth',
+    ENDPOINT: 'depth'
+  },
+}
+
+export enum Level  {
+  LEVEL_5 = '5',
+  LEVEL_10 = '10',
+  LEVEL_20 = '20'
+}
+
+export enum Interval {
+  I_100ms = '100ms',
+  I_1000ms = '1000ms',
+  I_1m = '1m',
+  I_3m = '3m',
+  I_5m = '5m',
+  I_15m = '15m',
+  I_30m = '30m',
+  I_1h = '1h',
+  I_2h = '2h',
+  I_4h = '4h',
+  I_6h = '6h',
+  I_8h = '8h',
+  I_12h = '12h',
+  I_1d = '1d',
+  I_3d = '3d',
+  I_1w = '1w',
+  I_1M = '1M',
+}
+
+// 币本位合约REST API
+export enum CMFRestApi {
+    EXCHANGE_INFO = '/dapi/v1/exchangeInfo', // 获取交易规则和交易对
 }

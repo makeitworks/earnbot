@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { BinanceSpotService } from './spot/spot.service';
-import { BinanceCMFutureService } from './cmfuture/cmfuture.service';
+import { BinanceCMFService } from './cmf/cmf.service';
 import { BinanceSpotRestClient } from './spot/spot.rest.client';
 import { BinanceSpotMarketWsClient } from './spot/market.ws.client';
-import { BinanceCMFutureRestClient } from './cmfuture/spot.rest.client';
-import { BinanceCMFutureWsClient } from './cmfuture/market.ws.client';
+import { BinanceCMFRestClient } from './cmf/spot.rest.client';
+import { BinanceCMFMarketWsClient } from './cmf/market.ws.client';
 
 
 @Module({
@@ -14,14 +14,18 @@ import { BinanceCMFutureWsClient } from './cmfuture/market.ws.client';
     BinanceSpotMarketWsClient,
     BinanceSpotService,
 
-    // CMFuture
-    BinanceCMFutureRestClient,
-    BinanceCMFutureWsClient,
-    BinanceCMFutureService,
+    // Coin-Margin Future
+    BinanceCMFRestClient,
+    BinanceCMFMarketWsClient,
+    BinanceCMFService,
+
+    // USDT-Margin Future
+
   ],
   exports: [
     BinanceSpotService,
-    BinanceCMFutureService,
+    BinanceCMFService,
+    // BinanceUMFService,
   ],
 })
-export class BinanceModule {}
+export class BinanceModule { }

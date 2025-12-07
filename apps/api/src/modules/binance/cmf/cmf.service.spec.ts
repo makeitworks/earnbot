@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BinanceCMFutureService } from './cmfuture.service';
+import { BinanceCMFService } from './cmf.service';
 
 describe('CmfutureService', () => {
-  let service: BinanceCMFutureService;
+  let service: BinanceCMFService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BinanceCMFutureService],
+      providers: [BinanceCMFService],
     }).compile();
 
-    service = module.get<BinanceCMFutureService>(BinanceCMFutureService);
+    service = module.get<BinanceCMFService>(BinanceCMFService);
   });
 
   it('should be defined', () => {
