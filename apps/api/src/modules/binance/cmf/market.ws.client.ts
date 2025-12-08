@@ -5,7 +5,7 @@ import { Data } from "ws";
 @Injectable()
 export class BinanceCMFMarketWsClient extends BaseWebsocketClient {
   constructor() {
-    super("wss://ws-dapi.binance.com/ws-dapi/v1")
+    super("wss://dstream.binance.com/ws")
   }
 
   protected handleMessage(data: Data): void {

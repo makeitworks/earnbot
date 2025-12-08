@@ -55,6 +55,7 @@ export class BinanceSpotService {
     this.marketWsClient.registerOpenCloseCallbacks(onOpen, onClose);
   }
 
+  // ---------------------- 订阅信息流
   /**
    * 订阅归集交易数据(归集交易与逐笔交易的区别在于，同一个taker在同一价格与多个maker成交时，会被归集为一笔成交)
    */
