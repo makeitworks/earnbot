@@ -1,27 +1,38 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import * as Redis from 'ioredis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
-  private client: Redis.Redis;
+  private client: Redis;
 
-  private subscriber?: Redis.Redis;
+  private subscriber?: Redis;
 
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
-    this.client = new Redis.Redis({
-      host: this.configService.get('REDIS_HOST', 'localhost'),
-      port: this.configService.get('REDIS_PORT', 6379),
-      password: this.configService.get('REDIS_PASSWORD'),
-      db: this.configService.get('REDIS_DB', 0),
-    });
+
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+
+    const redisOptions = {
+      keepAlive: 30000, // keep connection alive every 30s, avoid `slice disconnection`
+      family: 4,  // force IPv4 (optional, helps with some DNS resolution issues)
+    }
+
+    this.client = new Redis(redisUrl, redisOptions);
+    // 使用与主连接相同配置创建独立订阅连接
+    this.subscriber = new Redis(redisUrl, redisOptions);
   }
 
   onModuleDestroy() {
     this.client.disconnect();
+    this.subscriber.disconnect();
   }
 
   /**
@@ -239,13 +250,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     handler: (channel: string, message: string) => void,
   ): Promise<void> {
     if (!this.subscriber) {
-      // 使用与主连接相同配置创建独立订阅连接
-      this.subscriber = new Redis.Redis({
-        host: this.configService.get('REDIS_HOST', 'localhost'),
-        port: this.configService.get('REDIS_PORT', 6379),
-        password: this.configService.get('REDIS_PASSWORD'),
-        db: this.configService.get('REDIS_DB', 0),
-      });
       this.subscriber.on('message', (ch: string, message: string) => {
         handler(ch, message);
       });
