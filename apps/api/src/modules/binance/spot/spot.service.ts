@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BinanceSpotRestClient } from './spot.rest.client';
+import { BinanceSpotRestClient } from './rest.client';
 import { BinanceSpotMarketWsClient } from './market.ws.client';
 
 import * as BinanceEnums from '../../../common/enums/binance.enums';
