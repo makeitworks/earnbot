@@ -48,7 +48,7 @@ export interface BinanceCMFSymbolInfo {
 //     "E": 1765264074730,
 //     "ps": "ETHUSD"
 // }
-export interface BinanceBookTicker {
+export interface BinanceCMFBookTicker {
   e: string;  // 事件类型
   u: number;  // 更新ID
   s: string;  // 交易对
@@ -59,4 +59,13 @@ export interface BinanceBookTicker {
   T: number;  // 撮合时间
   E: number;  // 事件时间
   ps: string; // 标的交易对
+}
+
+export interface BinanceSpotBookTicker {
+  u: number; // 更新ID
+  s: string; // 交易对
+  b: string; // 买单最优挂单价格
+  B: string; // 买单最优挂单数量
+  a: string; // 卖单最优挂单价格
+  A: string; // 卖单最优挂单数量
 }

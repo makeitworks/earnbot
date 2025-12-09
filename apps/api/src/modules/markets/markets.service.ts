@@ -2,8 +2,9 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { BinanceSpotService } from '../binance/spot/spot.service';
 import { BinanceCMFService } from '../binance/cmf/cmf.service';
 import {
-  BinanceBookTicker,
+  BinanceCMFBookTicker,
   BinanceCMFSymbolInfo,
+  BinanceSpotBookTicker,
   BinanceSpotSymbolInfo,
 } from '../../common/dto/binance.dto';
 import { RedisService } from '../../database/redis/redis.service';
@@ -68,15 +69,6 @@ export class MarketsService implements OnModuleInit {
     });
 
     // 订阅最佳挂单信息
-    // let watchSpotSymbols: string[] = [];
-    // allKeys.forEach(async (key) => {
-    //   let symbolInfo =
-    //     await this.redisService.getJson<BinanceSpotSymbolInfo>(key);
-
-    //   if (symbolInfo.status == BinanceEnums.TradeStatus.TRADING) {
-    //     watchSpotSymbols.push(symbolInfo.symbol);
-    //   }
-    // });
      const infoPromises = Object.keys(spotSymbols).map((key) => 
         this.redisService.getJson<BinanceSpotSymbolInfo>(key)
     );
@@ -139,7 +131,7 @@ export class MarketsService implements OnModuleInit {
     this.logger.warn('[binance] coin-margin future market websocket closed!');
   }
 
-  onCMFBookTickerCallback(data: BinanceBookTicker) {
+  onCMFBookTickerCallback(data: BinanceCMFBookTicker) {
     this.redisService.setJson(
       `${RedisEnums.KeyPrefix.BINANCE_CMF_BOOK_TICKER}:${data.s}`,
       data,
@@ -147,7 +139,7 @@ export class MarketsService implements OnModuleInit {
     );
   }
 
-  onSpotBookTickerCallback(data: BinanceBookTicker) {
+  onSpotBookTickerCallback(data: BinanceSpotBookTicker) {
     this.redisService.setJson(
       `${RedisEnums.KeyPrefix.BINANCE_SPOT_BOOK_TICKER}:${data.s}`,
       data,
