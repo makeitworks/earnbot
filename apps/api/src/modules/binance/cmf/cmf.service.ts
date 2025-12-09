@@ -14,11 +14,8 @@ export class BinanceCMFService {
     private readonly marketWsClient: BinanceCMFMarketWsClient,
   ) { }
 
-    /**
-   * 注册websocket 打开与关闭事件回调
-   */
-  public registerMarketOpenCloseCallbacks(onOpen: () => void, onClose: () => void) {
-    this.marketWsClient.registerOpenCloseCallbacks(onOpen, onClose);
+  public initalize(onOpen: ()=> void, onClose: ()=>void) {
+    this.marketWsClient.initialize(onOpen, onClose);
   }
 
   /**
@@ -34,7 +31,7 @@ export class BinanceCMFService {
       symbol: s.symbol,
       pair: s.pair,
       contractType: s.contractType as BinanceEnums.ContractType,
-      orderType: s.orderType as BinanceEnums.OrderType,
+      orderTypes: s.orderTypes as BinanceEnums.OrderType[],
       deliveryDate: s.deliveryDate,
       onboardDate: s.onboardDate,
       contractStatus: s.contractStatus as BinanceEnums.ContractStatus,

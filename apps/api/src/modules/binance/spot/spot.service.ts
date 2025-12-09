@@ -5,7 +5,6 @@ import { BinanceSpotMarketWsClient } from './market.ws.client';
 import * as BinanceEnums from '../../../common/enums/binance.enums';
 
 import { BinanceSpotSymbolInfo } from '../../../common/dto/binance.dto';
-// import { Interval, Level, SpotWsApi } from './api.enum';
 
 @Injectable()
 export class BinanceSpotService {
@@ -17,18 +16,22 @@ export class BinanceSpotService {
     private readonly marketWsClient: BinanceSpotMarketWsClient
   ) { }
 
+
+  public initialize(onOpen: ()=>void, onClose: ()=> void) {
+    this.marketWsClient.initialize(onOpen, onClose);
+  }
+
    /**
    * 获取所有交易对信息
    */
   async getPairsFromEx(symbols?: string[]): Promise<BinanceSpotSymbolInfo[]> {
-    let params: any = {
+    let params: Record<string, any> = {
       showPermissionSets: false,
     }
     if (symbols && symbols.length > 0) {
       params.symbols = [];
-      symbols.forEach(symbol => params.push(symbol))
+      symbols.forEach(symbol => params.symbols.push(symbol))
     }
-
     let exchangeInfo = await this.restClient.get(BinanceEnums.SpotRestApi.EXCHANGE_INFO, params);
     return exchangeInfo.symbols.map(symbol => this.transformSpotSymbolInfo(symbol))
   }
@@ -46,13 +49,6 @@ export class BinanceSpotService {
       orderTypes: s.orderTypes as BinanceEnums.OrderType[]
     }
     return d;
-  }
-
-  /**
-   * 注册现货websocket 打开与关闭事件回调
-   */
-  public registerMarketOpenCloseCallbacks(onOpen: () => void, onClose: () => void) {
-    this.marketWsClient.registerOpenCloseCallbacks(onOpen, onClose);
   }
 
   // ---------------------- 订阅信息流

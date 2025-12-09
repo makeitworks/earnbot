@@ -14,6 +14,24 @@ export abstract class BaseRestClient {
     this.client = axios.create({
       baseURL: this.baseUrl,
       timeout: 10000,
+      paramsSerializer: (params) => {
+        const searchParams = new URLSearchParams();
+        
+        for (const key in params) {
+          const value = params[key];
+          
+          if (Array.isArray(value)) {
+            // 核心逻辑：如果是数组，转换为 JSON 字符串
+            // 结果变成 symbols=["BTC","ETH"]
+            searchParams.append(key, JSON.stringify(value));
+          } else {
+            searchParams.append(key, value);
+          }
+        }
+        
+        // 返回编码后的字符串 (URLSearchParams 会自动处理 URL 编码)
+        return searchParams.toString();
+      }
     });
   }
 

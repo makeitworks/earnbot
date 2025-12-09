@@ -6,7 +6,6 @@ import { BinanceSpotMarketWsClient } from './spot/market.ws.client';
 import { BinanceCMFRestClient } from './cmf/spot.rest.client';
 import { BinanceCMFMarketWsClient } from './cmf/market.ws.client';
 
-
 @Module({
   providers: [
     // Spot

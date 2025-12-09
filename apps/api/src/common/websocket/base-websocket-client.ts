@@ -24,7 +24,9 @@ export abstract class BaseWebsocketClient {
   /**
    * 初始化，调用connect连接服务器
    */
-  public initialize(): void {
+  public initialize(onOpen:()=>void, onClose: ()=> void): void {
+    this.onOpenCallback = onOpen;
+    this.onCloseCallback = onClose;
     this.connect();
   }
 
@@ -32,12 +34,6 @@ export abstract class BaseWebsocketClient {
    * 处理收到的消息
    */
   protected abstract handleMessage(data: WebSocket.Data): void;
-
-
-  public registerOpenCloseCallbacks(onOpen: () => void, onClose: () => void) {
-    this.onOpenCallback = onOpen;
-    this.onCloseCallback = onClose;
-  }
 
   /** 
    * websocket连接
