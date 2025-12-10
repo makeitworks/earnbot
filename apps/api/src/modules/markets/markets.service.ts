@@ -131,6 +131,9 @@ export class MarketsService implements OnModuleInit {
     this.logger.warn('[binance] coin-margin future market websocket closed!');
   }
 
+  /**
+   * 可以在onCMFBookTickerCallback,onSpotBookTickerCallback回调中检测机会
+   */
   onCMFBookTickerCallback(data: BinanceCMFBookTicker) {
     this.redisService.setJson(
       `${RedisEnums.KeyPrefix.BINANCE_CMF_BOOK_TICKER}:${data.s}`,
