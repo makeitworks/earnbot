@@ -10,6 +10,11 @@ import {
 import { RedisService } from '../../database/redis/redis.service';
 import * as RedisEnums from '../../common/enums/redis.enums';
 import * as BinanceEnums from '../../common/enums/binance.enums';
+import { EventGateway } from '../event/event.gateway';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { SymbolPrice } from '../../common/dto/common.dto';
+
+import * as EventEnums from '../../common/enums/event.enums';
 
 @Injectable()
 export class MarketsService implements OnModuleInit {
@@ -19,6 +24,7 @@ export class MarketsService implements OnModuleInit {
     private readonly redisService: RedisService,
     private readonly binanceSpotService: BinanceSpotService,
     private readonly binanceCMFService: BinanceCMFService,
+    private readonly eventGateway: EventGateway,
   ) {}
 
   onModuleInit() {
@@ -33,6 +39,43 @@ export class MarketsService implements OnModuleInit {
       this.onCMFMarketWsOpen.bind(this),
       this.onCMFMarketWsClose.bind(this),
     );
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async pushSymbolPrice() {
+    this.logger.log('--------> start')
+    let priceList : SymbolPrice[] = [];
+
+    // 获取价格
+    let spotKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_SPOT_BOOK_TICKER}:*`);
+    await Promise.all(
+      spotKeys.map( async (key)=> {
+        let bookTicker = await this.redisService.getJson<BinanceSpotBookTicker>(key);
+        let price: SymbolPrice = {
+          symbol: bookTicker.s,
+          buy: bookTicker.B,
+          sell: bookTicker.a
+        };
+        priceList.push(price);
+      })
+    )
+    // 
+    let cmfKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_CMF_BOOK_TICKER}:*`);
+    await Promise.all(
+      cmfKeys.map(async (key)=> {
+        let bookTicker = await this.redisService.getJson<BinanceCMFBookTicker>(key);
+        let price: SymbolPrice = {
+          symbol: bookTicker.s,
+          buy: bookTicker.b,
+          sell: bookTicker.a
+        }
+        priceList.push(price);
+      })
+    )
+
+    // this.logger.log('----->boardcast symbol price:', priceList);
+    this.eventGateway.broadcast(EventEnums.EventNameEnum.SYMBOL_PRICE, priceList);
+
   }
 
   async onSpotMarketWsOpen(symbols?: string[]) {
