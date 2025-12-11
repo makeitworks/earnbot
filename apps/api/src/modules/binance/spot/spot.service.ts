@@ -1,11 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BinanceSpotRestClient } from './spot.rest.client';
+import { BinanceSpotRestClient } from './rest.client';
 import { BinanceSpotMarketWsClient } from './market.ws.client';
 
 import * as BinanceEnums from '../../../common/enums/binance.enums';
 
 import { BinanceSpotSymbolInfo } from '../../../common/dto/binance.dto';
-// import { Interval, Level, SpotWsApi } from './api.enum';
 
 @Injectable()
 export class BinanceSpotService {
@@ -17,18 +16,22 @@ export class BinanceSpotService {
     private readonly marketWsClient: BinanceSpotMarketWsClient
   ) { }
 
+
+  public initialize(onOpen: ()=>void, onClose: ()=> void) {
+    this.marketWsClient.initialize(onOpen, onClose);
+  }
+
    /**
    * 获取所有交易对信息
    */
   async getPairsFromEx(symbols?: string[]): Promise<BinanceSpotSymbolInfo[]> {
-    let params: any = {
+    let params: Record<string, any> = {
       showPermissionSets: false,
     }
     if (symbols && symbols.length > 0) {
       params.symbols = [];
-      symbols.forEach(symbol => params.push(symbol))
+      symbols.forEach(symbol => params.symbols.push(symbol))
     }
-
     let exchangeInfo = await this.restClient.get(BinanceEnums.SpotRestApi.EXCHANGE_INFO, params);
     return exchangeInfo.symbols.map(symbol => this.transformSpotSymbolInfo(symbol))
   }
@@ -48,13 +51,7 @@ export class BinanceSpotService {
     return d;
   }
 
-  /**
-   * 注册现货websocket 打开与关闭事件回调
-   */
-  public registerMarketOpenCloseCallbacks(onOpen: () => void, onClose: () => void) {
-    this.marketWsClient.registerOpenCloseCallbacks(onOpen, onClose);
-  }
-
+  // ---------------------- 订阅信息流
   /**
    * 订阅归集交易数据(归集交易与逐笔交易的区别在于，同一个taker在同一价格与多个maker成交时，会被归集为一笔成交)
    */

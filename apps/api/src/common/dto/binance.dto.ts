@@ -17,7 +17,7 @@ export interface BinanceCMFSymbolInfo {
   symbol: string;  // 交易对
   pair: string; // 标的交易对
   contractType: ContractType; // 合约类型
-  orderType: OrderType;
+  orderTypes: OrderType[];
   deliveryDate: number; // 
   onboardDate: number; //
   contractStatus: ContractStatus, //
@@ -32,4 +32,40 @@ export interface BinanceCMFSymbolInfo {
   triggerProtect: string;
   underlyingType: string; // 标的类型
   timeInForce: TimeInForce[]; // 有效方式
+}
+
+
+
+// {
+//     "e": "bookTicker",
+//     "u": 1550109917123,
+//     "s": "ETHUSD_PERP",
+//     "b": "3115.13",
+//     "B": "2916",
+//     "a": "3115.14",
+//     "A": "1",
+//     "T": 1765264074728,
+//     "E": 1765264074730,
+//     "ps": "ETHUSD"
+// }
+export interface BinanceCMFBookTicker {
+  e: string;  // 事件类型
+  u: number;  // 更新ID
+  s: string;  // 交易对
+  b: string;  // 买单最优挂单价格
+  B: string;  // 买单最优挂单数量
+  a: string;  // 卖单最优挂单价格
+  A: string;  // 卖单最优挂单数量
+  T: number;  // 撮合时间
+  E: number;  // 事件时间
+  ps: string; // 标的交易对
+}
+
+export interface BinanceSpotBookTicker {
+  u: number; // 更新ID
+  s: string; // 交易对
+  b: string; // 买单最优挂单价格
+  B: string; // 买单最优挂单数量
+  a: string; // 卖单最优挂单价格
+  A: string; // 卖单最优挂单数量
 }

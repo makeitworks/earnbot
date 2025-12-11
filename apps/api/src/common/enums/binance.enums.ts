@@ -130,7 +130,11 @@ export enum Level  {
 
 export enum Interval {
   I_100ms = '100ms',
+  I_250ms = '250ms',
+  I_500ms = '500ms',
   I_1000ms = '1000ms',
+  I_1s = '1s',
+  I_3s = '3s',
   I_1m = '1m',
   I_3m = '3m',
   I_5m = '5m',
@@ -151,4 +155,44 @@ export enum Interval {
 // 币本位合约REST API
 export enum CMFRestApi {
     EXCHANGE_INFO = '/dapi/v1/exchangeInfo', // 获取交易规则和交易对
+}
+
+// 币本位合约Websocket API 
+export const CMFWsApi = {
+  // 归集交易
+  AGG_TRADE: {
+    NAME: 'aggTrade',
+    ENDPOINT: 'aggTrade'
+  },
+  // 最新现货指数价格
+  INDEX_PRICE: {
+    NAME: 'indexPriceUpdate',
+    ENDPOINT: 'indexPrice'
+  },
+  // 最新MarkPrice
+  MARK_PRICE: {
+    NAME: 'markPriceUpdate',
+    ENDPOINT: 'markPrice',
+  },
+  // K线
+  KLINE: {
+    NAME: 'kline',
+    ENDPOINT: 'kline'
+  },
+  // 有限档深度信息
+  DEPTH: {
+    NAME: 'depthUpdate',
+    ENDPOINT: 'depth',
+  },
+  // 按Symbol的最优挂单信息
+  BOOK_TICKER: {
+    NAME: 'bookTicker',
+    ENDPOINT: 'bookTicker'
+  },
+  // 全市场最优挂单信息
+  FULL_BOOK_TICKER: {
+    NAME: 'bookTicker',
+    ENDPOINT: '!bookTicker'
+  }
+
 }
