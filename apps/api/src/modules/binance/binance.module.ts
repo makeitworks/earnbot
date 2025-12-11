@@ -3,7 +3,7 @@ import { BinanceSpotService } from './spot/spot.service';
 import { BinanceCMFService } from './cmf/cmf.service';
 import { BinanceSpotRestClient } from './spot/spot.rest.client';
 import { BinanceSpotMarketWsClient } from './spot/market.ws.client';
-import { BinanceCMFRestClient } from './cmf/spot.rest.client';
+import { BinanceCMFRestClient } from './cmf/cmf.rest.client';
 import { BinanceCMFMarketWsClient } from './cmf/market.ws.client';
 
 
