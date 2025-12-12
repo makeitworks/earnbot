@@ -5,16 +5,20 @@ import { EventModule } from './modules/event/event.module';
 import { BinanceModule } from './modules/binance/binance.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from './database/redis/redis.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     ScheduleModule.forRoot(),
     MarketsModule, 
     EventModule, 
     BinanceModule, 
-    RedisModule,
+    RedisModule, AuthModule, UserModule,
   ],
   controllers: [],
   providers: [],
