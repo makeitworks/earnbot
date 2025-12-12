@@ -72,10 +72,7 @@ export class MarketsService implements OnModuleInit {
         priceList.push(price);
       })
     )
-
-    // this.logger.log('----->boardcast symbol price:', priceList);
     this.eventGateway.broadcast(EventEnums.EventNameEnum.SYMBOL_PRICE, priceList);
-
   }
 
   async onSpotMarketWsOpen(symbols?: string[]) {
