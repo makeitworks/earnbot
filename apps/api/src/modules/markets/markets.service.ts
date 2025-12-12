@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { BinanceSpotService } from '../binance/spot/spot.service';
-import { BinanceCMFService } from '../binance/cmf/cmf.service';
+import { BinanceSpotService } from '../binance/spot/service';
+import { BinanceCMFService } from '../binance/cmf/service';
 import {
   BinanceCMFBookTicker,
   BinanceCMFSymbolInfo,

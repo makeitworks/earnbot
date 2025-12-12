@@ -1,6 +1,6 @@
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
-import { BinanceSpotService } from './spot/spot.service';
-import { BinanceCMFService } from './cmf/cmf.service';
+import { BinanceSpotService } from './spot/service';
+import { BinanceCMFService } from './cmf/service';
 import { BinanceSpotRestClient } from './spot/rest.client';
 import { BinanceSpotMarketWsClient } from './spot/market.ws.client';
 <<<<<<< HEAD

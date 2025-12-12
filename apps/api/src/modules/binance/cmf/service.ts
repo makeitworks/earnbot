@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BinanceCMFRestClient } from './cmf.rest.client';
+import { BinanceCMFRestClient } from './rest.client';
 import { BinanceCMFMarketWsClient } from './market.ws.client';
 import { BinanceCMFSymbolInfo } from '../../../common/dto/binance.dto';
 import * as BinanceEnums from '../../../common/enums/binance.enums'
