@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 // This should be a real class/interface representing a user entity
 export type User = any;
@@ -18,6 +20,8 @@ export class UserService {
             password: 'guess',
         },
     ];
+
+    constructor(@InjectConnection() private mongoConnection: Connection) {}
 
     async findOne(username: string): Promise<User | undefined> {
         return this.users.find(user => user.username === username);

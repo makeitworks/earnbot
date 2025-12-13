@@ -18,16 +18,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
 
-    const redisUrl = this.configService.get<string>('REDIS_URL');
+    const redis = this.configService.get('redis');
 
     const redisOptions = {
       keepAlive: 30000, // keep connection alive every 30s, avoid `slice disconnection`
       family: 4,  // force IPv4 (optional, helps with some DNS resolution issues)
     }
 
-    this.client = new Redis(redisUrl, redisOptions);
+    this.client = new Redis(redis.uri, redisOptions);
     // 使用与主连接相同配置创建独立订阅连接
-    this.subscriber = new Redis(redisUrl, redisOptions);
+    this.subscriber = new Redis(redis.uri, redisOptions);
   }
 
   onModuleDestroy() {

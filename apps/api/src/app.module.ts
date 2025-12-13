@@ -7,18 +7,28 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from './database/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { MongodbModule } from './database/mongodb/mongodb.module';
+import mongodbConfig from './config/mongodb.config';
+import redisConfig from './config/redis.config';
 
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      load: [
+        mongodbConfig,
+        redisConfig,
+      ]
     }),
     ScheduleModule.forRoot(),
     MarketsModule, 
     EventModule, 
     BinanceModule, 
-    RedisModule, AuthModule, UserModule,
+    RedisModule, 
+    AuthModule, 
+    UserModule, 
+    MongodbModule,
   ],
   controllers: [],
   providers: [],
