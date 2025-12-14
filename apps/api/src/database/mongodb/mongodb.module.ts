@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { MongodbService } from './mongodb.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 
@@ -18,7 +17,7 @@ import { ConfigService } from '@nestjs/config';
       }
     })
   ],
-  providers: [MongodbService],
-  exports: [MongodbService],
+  providers: [],
+  exports: [],
 })
 export class MongodbModule {}
