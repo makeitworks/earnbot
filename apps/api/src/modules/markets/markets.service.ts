@@ -13,11 +13,9 @@ import {
 } from '../../common/dto/binance.dto';
 import { RedisService } from '../../database/redis/redis.service';
 import * as RedisEnums from '../../common/enums/redis.enums';
-import * as BinanceEnums from '../../common/enums/binance.enums';
 import { EventGateway } from '../event/event.gateway';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SymbolPrice } from '../../common/dto/common.dto';
-
 import * as EventEnums from '../../common/enums/event.enums';
 import { sleepAWhile } from '../../common/utils/utils';
 
@@ -96,13 +94,9 @@ export class MarketsService implements OnModuleInit {
       }  
     } while(true);
 
-    // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker，深度信息)
+    // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker)
     // 1.订阅全市场精简Ticker
     this.binanceSpotService.subscribeMiniTicker([], this.onSpotMiniTickerCallback.bind(this));
-
-    // 订阅深度信息
-    let symbols = allSymbols.map( symbolInfo => symbolInfo.symbol );
-    this.binanceSpotService.subscribeDepth(symbols, BinanceEnums.Level.LEVEL_5, BinanceEnums.Interval.I_1000ms, this.onSpotDepthCallback);
 
     // 将symbol信息缓存到redis
     allSymbols.map( symbolInfo => this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_SYMBOL}:${symbolInfo.symbol}`, symbolInfo, RedisEnums.KeyDefaultExpireInSec) );
@@ -132,13 +126,9 @@ export class MarketsService implements OnModuleInit {
       }
     } while (true);
 
-    // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker，深度信息)
+    // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker)
     // 1. 订阅全市场symbol精简Ticker
     this.binanceCMFService.subscribeMiniTicker([], this.onCMFMiniTickerCallback.bind(this));
-
-    // 2. 订阅深度信息
-    let symbols = allSymbols.map(symbol => symbol.symbol);
-    this.binanceCMFService.subscribeDepth(symbols, BinanceEnums.Level.LEVEL_5, BinanceEnums.Interval.I_500ms, this.onCMFDepthCallback.bind(this));
 
     // 将symbol信息缓存到redis
     allSymbols.map(symbolInfo => this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_CMF_SYMBOL}:${symbolInfo.symbol}`, symbolInfo, RedisEnums.KeyDefaultExpireInSec));
@@ -171,28 +161,32 @@ export class MarketsService implements OnModuleInit {
    * MiniTicker
    */
   onCMFMiniTickerCallback(data: BinanceCMFMiniTicker[] ) {
-
+    data.forEach( item => {
+      this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_CMF_MINI_TICKER}:${item.s}`, item, RedisEnums.KeyDefaultExpireInSec);
+    });
   }
 
   /**
    * Coin-Margin 合约深度信息
    */
   onCMFDepthCallback(data: BinanceCMFDepth) {
-    
+    this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_CMF_DEPTH}:${data.s}`, data, RedisEnums.KeyDefaultExpireInSec);
   }
 
   /**
    * Spot MiniTicker
    */
   onSpotMiniTickerCallback(data: BinanceSpotMiniTicker[]) {
-
+    data.forEach( item => {
+      this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_MINI_TICKER}:${item.s}`, item, RedisEnums.KeyDefaultExpireInSec);
+    })
   }
 
   /**
    * Spot Depth Callback
    */
   onSpotDepthCallback(data: BinanceSpotDepth) {
-    
+    // this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_DEPTH}:${data}`, data, RedisEnums.KeyDefaultExpireInSec);
   }
 
 }
