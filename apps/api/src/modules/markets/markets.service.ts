@@ -78,6 +78,7 @@ export class MarketsService implements OnModuleInit {
   }
 
   async onSpotMarketWsOpen() {
+    this.logger.log('[binance] spot market websocket opened!');
     let allSymbols: BinanceSpotSymbolInfo[] = [];
     
     do {
