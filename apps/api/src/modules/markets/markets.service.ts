@@ -44,39 +44,52 @@ export class MarketsService implements OnModuleInit {
     );
   }
 
+  /**
+   * 向客户端推送价格信息
+   */
   @Cron(CronExpression.EVERY_5_SECONDS)
   async pushSymbolPrice() {
-    let priceList : SymbolPrice[] = [];
+    // let priceList : SymbolPrice[] = [];
 
-    // 获取价格
-    let spotKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_SPOT_BOOK_TICKER}:*`);
-    await Promise.all(
-      spotKeys.map( async (key)=> {
-        let bookTicker = await this.redisService.getJson<BinanceSpotBookTicker>(key);
-        let price: SymbolPrice = {
-          symbol: bookTicker.s,
-          buy: bookTicker.B,
-          sell: bookTicker.a
-        };
-        priceList.push(price);
-      })
-    )
-    // 
-    let cmfKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_CMF_BOOK_TICKER}:*`);
-    await Promise.all(
-      cmfKeys.map(async (key)=> {
-        let bookTicker = await this.redisService.getJson<BinanceCMFBookTicker>(key);
-        let price: SymbolPrice = {
-          symbol: bookTicker.s,
-          buy: bookTicker.b,
-          sell: bookTicker.a
-        }
-        priceList.push(price);
-      })
-    )
-    this.eventGateway.broadcast(EventEnums.EventNameEnum.SYMBOL_PRICE, priceList);
+    // // 获取价格
+    // let spotKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_SPOT_BOOK_TICKER}:*`);
+    // await Promise.all(
+    //   spotKeys.map( async (key)=> {
+    //     let bookTicker = await this.redisService.getJson<BinanceSpotBookTicker>(key);
+    //     let price: SymbolPrice = {
+    //       symbol: bookTicker.s,
+    //       buy: bookTicker.B,
+    //       sell: bookTicker.a
+    //     };
+    //     priceList.push(price);
+    //   })
+    // )
+    // // 
+    // let cmfKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_CMF_BOOK_TICKER}:*`);
+    // await Promise.all(
+    //   cmfKeys.map(async (key)=> {
+    //     let bookTicker = await this.redisService.getJson<BinanceCMFBookTicker>(key);
+    //     let price: SymbolPrice = {
+    //       symbol: bookTicker.s,
+    //       buy: bookTicker.b,
+    //       sell: bookTicker.a
+    //     }
+    //     priceList.push(price);
+    //   })
+    // )
+    // this.eventGateway.broadcast(EventEnums.EventNameEnum.SYMBOL_PRICE, priceList);
+    let marketData: Record<string, any> = {}
+
+    // 获取现货Mini Ticker数据
+    let spot
+
+    // 获取Coin-Margin 合约 Mini Ticker 数据
+
   }
 
+  /**
+   * 现货行情数据websocket连接开启
+   */
   async onSpotMarketWsOpen() {
     this.logger.log('[binance] spot market websocket opened!');
     let allSymbols: BinanceSpotSymbolInfo[] = [];
@@ -96,17 +109,22 @@ export class MarketsService implements OnModuleInit {
     } while(true);
 
     // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker)
-    // 1.订阅全市场精简Ticker
     this.binanceSpotService.subscribeMiniTicker([], this.onSpotMiniTickerCallback.bind(this));
 
     // 将symbol信息缓存到redis
     allSymbols.map( symbolInfo => this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_SYMBOL}:${symbolInfo.symbol}`, symbolInfo, RedisEnums.KeyDefaultExpireInSec) );
   }
 
+  /**
+   * 现货行情数据websocket连接关闭
+   */
   onSpotMarketWsClose() {
     this.logger.warn('[binance] spot market websocket closed!');
   }
 
+  /**
+   * Coin-Margin合约行情数据Websocket连接开启
+   */
   async onCMFMarketWsOpen() {
     this.logger.log('[binance] coin-margin future market websocket opened!');
 
@@ -128,19 +146,21 @@ export class MarketsService implements OnModuleInit {
     } while (true);
 
     // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker)
-    // 1. 订阅全市场symbol精简Ticker
     this.binanceCMFService.subscribeMiniTicker([], this.onCMFMiniTickerCallback.bind(this));
 
     // 将symbol信息缓存到redis
     allSymbols.map(symbolInfo => this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_CMF_SYMBOL}:${symbolInfo.symbol}`, symbolInfo, RedisEnums.KeyDefaultExpireInSec));
   }
 
+  /**
+   * Coin-Margin合约行情数据websocket 连接关闭
+   */
   onCMFMarketWsClose() {
     this.logger.warn('[binance] coin-margin future market websocket closed!');
   }
 
   /**
-   * 可以在onCMFBookTickerCallback,onSpotBookTickerCallback回调中检测机会
+   * Coin-Margin合约最优挂单数据推送回调
    */
   onCMFBookTickerCallback(data: BinanceCMFBookTicker) {
     this.redisService.setJson(
@@ -150,6 +170,9 @@ export class MarketsService implements OnModuleInit {
     );
   }
 
+  /**
+   * 现货最佳挂单数据推送回调
+   */
   onSpotBookTickerCallback(data: BinanceSpotBookTicker) {
     this.redisService.setJson(
       `${RedisEnums.KeyPrefix.BINANCE_SPOT_BOOK_TICKER}:${data.s}`,
@@ -159,7 +182,7 @@ export class MarketsService implements OnModuleInit {
   }
 
   /**
-   * MiniTicker
+   * MiniTicker推送数据回调
    */
   onCMFMiniTickerCallback(data: BinanceCMFMiniTicker[] ) {
     data.forEach( item => {
@@ -168,23 +191,26 @@ export class MarketsService implements OnModuleInit {
   }
 
   /**
-   * Coin-Margin 合约深度信息
+   * Coin-Margin 合约深度数据推送回调
    */
   onCMFDepthCallback(data: BinanceCMFDepth) {
     this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_CMF_DEPTH}:${data.s}`, data, RedisEnums.KeyDefaultExpireInSec);
   }
 
   /**
-   * Spot MiniTicker
+   * 现货 MiniTicker数据推送回调
    */
   onSpotMiniTickerCallback(data: BinanceSpotMiniTicker[]) {
     data.forEach( item => {
-      this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_MINI_TICKER}:${item.s}`, item, RedisEnums.KeyDefaultExpireInSec);
+      // 过滤非 USDT交易对
+      if( item.s.toUpperCase().includes('USDT') ) {
+        this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_MINI_TICKER}:${item.s}`, item, RedisEnums.KeyDefaultExpireInSec);
+      }
     })
   }
 
   /**
-   * Spot Depth Callback
+   * 现货深度数据推送回调(因为无symbol信息，暂时未实现)
    */
   onSpotDepthCallback(data: BinanceSpotDepth) {
     // this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_DEPTH}:${data}`, data, RedisEnums.KeyDefaultExpireInSec);
