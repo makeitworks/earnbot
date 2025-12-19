@@ -34,6 +34,7 @@ export interface BinanceCMFSymbolInfo {
   timeInForce: TimeInForce[]; // 有效方式
 }
 
+// Coin-Margin 最优挂单信息
 export interface BinanceCMFBookTicker {
   e: string;  // 事件类型
   u: number;  // 更新ID
@@ -47,6 +48,7 @@ export interface BinanceCMFBookTicker {
   ps: string; // 标的交易对
 }
 
+// 现货最优挂单
 export interface BinanceSpotBookTicker {
   u: number; // 更新ID
   s: string; // 交易对
@@ -56,6 +58,7 @@ export interface BinanceSpotBookTicker {
   A: string; // 卖单最优挂单数量
 }
 
+// Coin-Margin Mini ticker
 export interface BinanceCMFMiniTicker {
   e: string; // 事件类型
   E: number; // 事件时间
@@ -69,6 +72,7 @@ export interface BinanceCMFMiniTicker {
   q: string; // 24小时成交额
 }
 
+// Coin-Margin 深度信息
 export interface BinanceCMFDepth {
   e: string; // 时间类型
   E: number; // 事件事件
@@ -82,6 +86,7 @@ export interface BinanceCMFDepth {
   a: [string, string][]; // 卖方
 }
 
+// 现货mini ticker 信息
 export interface BinanceSpotMiniTicker {
   e: string; // 事件类型
   E: number; // 事件时间
