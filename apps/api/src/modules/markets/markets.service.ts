@@ -3,8 +3,12 @@ import { BinanceSpotService } from '../binance/spot/service';
 import { BinanceCMFService } from '../binance/cmf/service';
 import {
   BinanceCMFBookTicker,
+  BinanceCMFDepth,
+  BinanceCMFMiniTicker,
   BinanceCMFSymbolInfo,
   BinanceSpotBookTicker,
+  BinanceSpotDepth,
+  BinanceSpotMiniTicker,
   BinanceSpotSymbolInfo,
 } from '../../common/dto/binance.dto';
 import { RedisService } from '../../database/redis/redis.service';
@@ -15,6 +19,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { SymbolPrice } from '../../common/dto/common.dto';
 
 import * as EventEnums from '../../common/enums/event.enums';
+import { sleepAWhile } from '../../common/utils/utils';
 
 @Injectable()
 export class MarketsService implements OnModuleInit {
@@ -43,7 +48,6 @@ export class MarketsService implements OnModuleInit {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async pushSymbolPrice() {
-    this.logger.log('--------> start')
     let priceList : SymbolPrice[] = [];
 
     // 获取价格
@@ -75,59 +79,33 @@ export class MarketsService implements OnModuleInit {
     this.eventGateway.broadcast(EventEnums.EventNameEnum.SYMBOL_PRICE, priceList);
   }
 
-  async onSpotMarketWsOpen(symbols?: string[]) {
-    this.logger.log(
-      symbols
-        ? '[binance] subscribe spot market data'
-        : '[binance] spot market websocket opened!',
-    );
-    if (symbols) {
-      // GET SPOT SYMBOLS
-      let spotSymbols: BinanceSpotSymbolInfo[] =
-        await this.binanceSpotService.getPairsFromEx(symbols);
-      // 将现货交易对信息缓存到Redis
+  async onSpotMarketWsOpen() {
+    let allSymbols: BinanceSpotSymbolInfo[] = [];
+    
+    do {
+      try {
+        allSymbols = await this.binanceSpotService.getExchangeInfo();
+        if(allSymbols.length <= 0) {
+          throw new Error('getExchangeInfo failed with empty data');
+        }
+        break;
+      } catch(err) {
+        this.logger.error(err.message);
+        sleepAWhile(3000);
+        continue;
+      }  
+    } while(true);
 
-      await Promise.all(
-        spotSymbols.map((symbolInfo) =>
-          this.redisService.setJson(
-            `${RedisEnums.KeyPrefix.BINANCE_SPOT_SYMBOL}:${symbolInfo.symbol}`,
-            symbolInfo,
-            RedisEnums.KeyDefaultExpireInSec,
-          ),
-        ),
-      );
-    }
+    // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker，深度信息)
+    // 1.订阅全市场精简Ticker
+    this.binanceSpotService.subscribeMiniTicker([], this.onSpotMiniTickerCallback.bind(this));
 
-    // 获取交易对列表
-    let allKeys = await this.redisService.scan(
-      `${RedisEnums.KeyPrefix.BINANCE_SPOT_SYMBOL}:*`,
-    );
+    // 订阅深度信息
+    let symbols = allSymbols.map( symbolInfo => symbolInfo.symbol );
+    this.binanceSpotService.subscribeDepth(symbols, BinanceEnums.Level.LEVEL_5, BinanceEnums.Interval.I_1000ms, this.onSpotDepthCallback);
 
-    let spotSymbols: Record<string, boolean> = {};
-    allKeys.forEach((key) => {
-      spotSymbols[key] = true;
-    });
-
-    // 订阅最佳挂单信息
-     const infoPromises = Object.keys(spotSymbols).map((key) => 
-        this.redisService.getJson<BinanceSpotSymbolInfo>(key)
-    );
-
-    // 2. 等待所有读取操作完成
-    const allInfos = await Promise.all(infoPromises);
-
-    const watchSpotSymbols = allInfos
-        .filter((info) => info && info.status === BinanceEnums.TradeStatus.TRADING) // 过滤掉 null 和非交易状态
-        .map((info) => info.symbol); // 提取 symbol 字段
-
-    if (watchSpotSymbols.length <= 0) {
-      return;
-    }
-
-    this.binanceSpotService.subscribeBookTicker(
-      watchSpotSymbols,
-      this.onSpotBookTickerCallback.bind(this),
-    );
+    // 将symbol信息缓存到redis
+    allSymbols.map( symbolInfo => this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_SYMBOL}:${symbolInfo.symbol}`, symbolInfo, RedisEnums.KeyDefaultExpireInSec) );
   }
 
   onSpotMarketWsClose() {
@@ -136,35 +114,34 @@ export class MarketsService implements OnModuleInit {
 
   async onCMFMarketWsOpen() {
     this.logger.log('[binance] coin-margin future market websocket opened!');
-    // 获取交易对
-    let data: BinanceCMFSymbolInfo[] =
-      await this.binanceCMFService.getExchangeInfo();
 
-    // 订阅Coin-Margin合约交易对的最佳挂单信息
-    let watchCMFSymbols: string[] = [];
+    let allSymbols: BinanceCMFSymbolInfo[] = [];
+    do {
+      try {
+        // 获取所有对信息
+        allSymbols = await this.binanceCMFService.getExchangeInfo();
+        if (allSymbols.length <= 0) {
+          throw new Error('getExchangeInfo with empty.');
+        }
+        break;
+      } catch (err) {
+        this.logger.error(err.message);
+        // sleep 3 seconds and try again
+        await sleepAWhile(3000);
+        continue;
+      }
+    } while (true);
 
-    // 订阅现货交易对最佳挂单信息
-    let watchSpotSymbols: Record<string, boolean> = {};
+    // 订阅websocket市场数据流(全市场所有Symbol的精简Ticker，深度信息)
+    // 1. 订阅全市场symbol精简Ticker
+    this.binanceCMFService.subscribeMiniTicker([], this.onCMFMiniTickerCallback.bind(this));
 
-    // 将交易对数据缓存到redis
-    data.forEach((symbolInfo) => {
-      this.redisService.setJson(
-        `${RedisEnums.KeyPrefix.BINANCE_CMF_SYMBOL}:${symbolInfo.symbol}`,
-        symbolInfo,
-        RedisEnums.KeyDefaultExpireInSec,
-      );
+    // 2. 订阅深度信息
+    let symbols = allSymbols.map(symbol => symbol.symbol);
+    this.binanceCMFService.subscribeDepth(symbols, BinanceEnums.Level.LEVEL_5, BinanceEnums.Interval.I_500ms, this.onCMFDepthCallback.bind(this));
 
-      watchCMFSymbols.push(symbolInfo.symbol);
-
-      watchSpotSymbols[`${symbolInfo.baseAsset}USDT`] = true;
-    });
-
-    this.binanceCMFService.subscribeBookTicker(
-      watchCMFSymbols,
-      this.onCMFBookTickerCallback.bind(this),
-    );
-
-    this.onSpotMarketWsOpen(Object.keys(watchSpotSymbols));
+    // 将symbol信息缓存到redis
+    allSymbols.map(symbolInfo => this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_CMF_SYMBOL}:${symbolInfo.symbol}`, symbolInfo, RedisEnums.KeyDefaultExpireInSec));
   }
 
   onCMFMarketWsClose() {
@@ -189,4 +166,33 @@ export class MarketsService implements OnModuleInit {
       RedisEnums.KeyDefaultExpireInSec,
     );
   }
+
+  /**
+   * MiniTicker
+   */
+  onCMFMiniTickerCallback(data: BinanceCMFMiniTicker[] ) {
+
+  }
+
+  /**
+   * Coin-Margin 合约深度信息
+   */
+  onCMFDepthCallback(data: BinanceCMFDepth) {
+    
+  }
+
+  /**
+   * Spot MiniTicker
+   */
+  onSpotMiniTickerCallback(data: BinanceSpotMiniTicker[]) {
+
+  }
+
+  /**
+   * Spot Depth Callback
+   */
+  onSpotDepthCallback(data: BinanceSpotDepth) {
+    
+  }
+
 }

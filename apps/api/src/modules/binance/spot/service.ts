@@ -24,16 +24,12 @@ export class BinanceSpotService {
    /**
    * 获取所有交易对信息
    */
-  async getPairsFromEx(symbols?: string[]): Promise<BinanceSpotSymbolInfo[]> {
+  async getExchangeInfo(): Promise<BinanceSpotSymbolInfo[]> {
     let params: Record<string, any> = {
       showPermissionSets: false,
     }
-    if (symbols && symbols.length > 0) {
-      params.symbols = [];
-      symbols.forEach(symbol => params.symbols.push(symbol))
-    }
     let exchangeInfo = await this.restClient.get(BinanceEnums.SpotRestApi.EXCHANGE_INFO, params);
-    return exchangeInfo.symbols.map(symbol => this.transformSpotSymbolInfo(symbol))
+    return exchangeInfo.symbols.map( (symbol: any) => this.transformSpotSymbolInfo(symbol))
   }
 
   private transformSpotSymbolInfo(s: Record<string, any>): BinanceSpotSymbolInfo {
@@ -113,6 +109,20 @@ export class BinanceSpotService {
     payload.params = symbols.map( symbol => `${symbol.toLowerCase()}@${BinanceEnums.SpotWsApi.BOOK_TICKER.ENDPOINT}`);
 
     this.marketWsClient.subscribe(BinanceEnums.SpotWsApi.BOOK_TICKER.NAME, payload, callback);
+  }
+
+  /**
+   * 订阅精简Ticker
+   */
+  subscribeMiniTicker(symbols: string[], callback: (data: any)=> void) {
+    let payload: Record<string, any> = { params: []};
+    if(symbols.length <= 0) {
+      payload.params = [`!${BinanceEnums.SpotWsApi.MINI_TICKER}@arr`];
+    } else {
+      payload.params = symbols.map( symbol => `${symbol.toLowerCase()}@${BinanceEnums.SpotWsApi.MINI_TICKER.ENDPOINT}`)
+    }
+
+    this.marketWsClient.subscribe(BinanceEnums.SpotWsApi.MINI_TICKER.NAME, payload, callback);
   }
 
 }

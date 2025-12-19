@@ -9,61 +9,65 @@ export class BinanceSpotMarketWsClient extends BaseWebsocketClient {
     super('wss://stream.binance.com:443/ws');
   }
 
+  private getCallback(name: string): (data:any)=>void | null {
+    return this.subscriptions.get(name);
+  }
+
+  private parseMiniTicker(payloads: any) {
+    let callback = this.getCallback(BinanceEnums.SpotWsApi.MINI_TICKER.NAME);
+    if (callback) {
+      callback(payloads);
+    } else {
+      this.logger.log(`no ${BinanceEnums.SpotWsApi.MINI_TICKER.NAME} callback registered!`);
+    }
+  }
+
   protected handleMessage(data: Data): void {
     let payload = JSON.parse(data.toString());
-    let streamName = payload.e;
 
-    if (streamName) {
-      const callback = this.subscriptions.get(streamName);
-      if (callback) {
-        callback(payload);
-      } else {
-        this.logger.error(
-          `no stream '${streamName}' callback registered!!!, message: ${JSON.stringify(payload)}`,
-        );
-      }
+    // 订阅成功
+    if (payload.result === null && payload.id) { 
       return;
     }
 
-     if(payload.result === null && payload.id) { // 订阅成功
-      return ;
-    }
-
-    // book tiker data
-    if (
-      payload.u &&
-      payload.s &&
-      payload.b &&
-      payload.B &&
-      payload.a &&
-      payload.A
-    ) {
-      const callback = this.subscriptions.get(
-        BinanceEnums.SpotWsApi.BOOK_TICKER.NAME,
-      );
-      if (callback) {
-        callback(payload);
-      } else {
-        this.logger.error(
-          `no stream 'bookTiker' callback registered!!!, message: ${payload}`,
-        );
+    // mini Ticker
+    if (Array.isArray(payload)) {
+      // mini ticker
+      if (payload[0].e && payload[0].e === BinanceEnums.SpotWsApi.MINI_TICKER.NAME) {
+        this.parseMiniTicker(payload);
+        return;
       }
-      return;
     }
+    if (typeof payload === 'object') {
+      if (payload.e) {
+        // mini ticker
+        if (payload.e === BinanceEnums.SpotWsApi.MINI_TICKER.NAME) {
+          this.parseMiniTicker([payload])
+          return;
+        }
 
-    // depth data
-    if (payload.lastUpdateId && payload.bids && payload.asks) {
-      const callback = this.subscriptions.get(
-        BinanceEnums.SpotWsApi.DEPTH.NAME,
-      );
-      if (callback) {
-        callback(payload);
-      } else {
-        this.logger.error(
-          `no stream 'depth' callback registered!!!, message: ${payload}`,
-        );
+        // depth data
+        if (payload.lastUpdateId && payload.bids && payload.asks) {
+          const callback = this.getCallback(BinanceEnums.SpotWsApi.DEPTH.NAME);
+          if (callback) {
+            callback(payload);
+          } else {
+            this.logger.error(`no stream '${BinanceEnums.SpotWsApi.DEPTH.NAME}' callback registered!`);
+          }
+          return;
+        }
+
+        // book ticker data
+        if ( payload.u && payload.s && payload.b && payload.B && payload.a && payload.A) {
+          const callback = this.getCallback(BinanceEnums.SpotWsApi.BOOK_TICKER.NAME);
+          if (callback) {
+            callback(payload);
+          } else {
+            this.logger.error(`no '${BinanceEnums.SpotWsApi.BOOK_TICKER.NAME}' callback registered!`);
+          }
+          return;
+        }
       }
-      return;
     }
 
     this.logger.error(`unkown stream data:${data.toString()}`);

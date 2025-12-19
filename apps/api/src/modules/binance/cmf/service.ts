@@ -23,7 +23,7 @@ export class BinanceCMFService {
    */
   async getExchangeInfo(): Promise<BinanceCMFSymbolInfo[]> {
     let resp = await this.restClient.get(BinanceEnums.CMFRestApi.EXCHANGE_INFO)
-    return resp.symbols.map(symbol => this.transformCMFSymbolInfo(symbol));
+    return resp.symbols.map( (symbol: any) => this.transformCMFSymbolInfo(symbol));
   }
 
   private transformCMFSymbolInfo(s: Record<string, any>): BinanceCMFSymbolInfo {
@@ -127,6 +127,19 @@ export class BinanceCMFService {
       params: [`${BinanceEnums.CMFWsApi.FULL_BOOK_TICKER.ENDPOINT}`]
     }
     this.marketWsClient.subscribe(BinanceEnums.CMFWsApi.FULL_BOOK_TICKER.NAME, payload, callback);
+  }
+
+  /**
+   * 订阅精简Ticker
+   */
+  subscribeMiniTicker(symbols: string[], callback:(data: any) => void) {
+    let payload: Record<string, any> = { params: [] };
+    if(symbols.length <= 0) {
+      payload.params = [ `!${BinanceEnums.CMFWsApi.MINI_TICKER}@arr` ];
+    } else {
+      payload.params = symbols.map( symbol => `${symbol.toLowerCase()}@${BinanceEnums.CMFWsApi.MINI_TICKER}`)
+    }
+    this.marketWsClient.subscribe(BinanceEnums.CMFWsApi.MINI_TICKER.NAME, payload, callback);
   }
 
 }

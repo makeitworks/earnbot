@@ -100,22 +100,21 @@ export const SpotWsApi = {
     NAME: '24hrMiniTicker',
     ENDPOINT: 'miniTicker'
   },
-  MINI_ALL_TICKER: {
-    NAME: '24hrMiniTicker',
-    ENDPOINT: '!miniTicker@arr'
-  },
   TICKER: {
     NAME: '24hrTicker',
     ENDPOINT: 'ticker'
   },
+  // 最优挂单信息
   BOOK_TICKER: {
     NAME: 'bookTicker',
     ENDPOINT: 'bookTicker'
   },
+  // 平均价格
   AVG_PRICE: {
     NAME: 'avgPrice',
     ENDPOINT: 'avgPrice'
   },
+  // 有限档深度信息
   DEPTH: {
     NAME: 'depth',
     ENDPOINT: 'depth'
@@ -193,6 +192,11 @@ export const CMFWsApi = {
   FULL_BOOK_TICKER: {
     NAME: 'bookTicker',
     ENDPOINT: '!bookTicker'
+  },
+  // 精简ticker
+  MINI_TICKER: {
+    NAME: 'miniTicker',
+    ENDPOINT: 'miniTicker'
   }
 
 }

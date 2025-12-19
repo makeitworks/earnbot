@@ -9,59 +9,61 @@ export class BinanceCMFMarketWsClient extends BaseWebsocketClient {
     super('wss://dstream.binance.com/ws');
   }
 
+  private getCallback(name: string): (data: any) => void | null {
+    return this.subscriptions.get(name);
+  }
+
+  private parseMiniTicker(payloads: any) {
+    let callback = this.getCallback(BinanceEnums.CMFWsApi.MINI_TICKER.NAME);
+    if(callback) {
+      callback(payloads);
+    } else {
+      this.logger.log(`no ${BinanceEnums.CMFWsApi.MINI_TICKER.NAME} callback registered!`);
+    }
+  }
+
   protected handleMessage(data: Data): void {
     let payload = JSON.parse(data.toString());
-    let streamName = payload.e;
 
-    if (streamName) {
-      const callback = this.subscriptions.get(streamName);
-      if (callback) {
-        callback(payload);
-      } else {
-        this.logger.error(
-          `no stream '${streamName}' callback registered!!!, message: ${payload}`,
-        );
-      }
+    if (payload.result === null && payload.id) { // 订阅成功
       return;
     }
 
-    if(payload.result === null && payload.id) { // 订阅成功
-      return ;
-    }
-
-    // book tiker data
-    if (
-      payload.u &&
-      payload.s &&
-      payload.b &&
-      payload.B &&
-      payload.a &&
-      payload.A
-    ) {
-      const callback = this.subscriptions.get(
-        BinanceEnums.CMFWsApi.BOOK_TICKER.NAME,
-      );
-      if (callback) {
-        callback(payload);
-      } else {
-        this.logger.error(
-          `no stream 'bookTiker' callback registered!!!, message: ${payload}`,
-        );
+    // mini ticker
+    if (Array.isArray(payload)) {
+      if (payload[0].e && payload[0].e === BinanceEnums.CMFWsApi.MINI_TICKER.NAME) {
+        this.parseMiniTicker(payload);
+        return;
       }
-      return;
     }
-
-    // depth data
-    if (payload.lastUpdateId && payload.bids && payload.asks) {
-      const callback = this.subscriptions.get(BinanceEnums.CMFWsApi.DEPTH.NAME);
-      if (callback) {
-        callback(payload);
-      } else {
-        this.logger.error(
-          `no stream 'depth' callback registered!!!, message: ${payload}`,
-        );
+    if (typeof payload === 'object') {
+      // mini ticker
+      if (payload.e === BinanceEnums.CMFWsApi.MINI_TICKER.NAME) {
+        this.parseMiniTicker([payload]);
+        return;
       }
-      return;
+
+      // depth data
+      if (payload.lastUpdateId && payload.bids && payload.asks) {
+        const callback = this.getCallback(BinanceEnums.CMFWsApi.DEPTH.NAME);
+        if (callback) {
+          callback(payload);
+        } else {
+          this.logger.error(`no '${BinanceEnums.CMFWsApi.DEPTH.NAME}' callback registered!`);
+        }
+        return;
+      }
+
+      // book tiker data
+      if (payload.u && payload.s && payload.b && payload.B && payload.a && payload.A) {
+        const callback = this.getCallback(BinanceEnums.CMFWsApi.BOOK_TICKER.NAME);
+        if (callback) {
+          callback(payload);
+        } else {
+          this.logger.error(`no ${BinanceEnums.CMFWsApi.BOOK_TICKER.NAME} callback registered!`);
+        }
+        return;
+      }
     }
 
     this.logger.error(`unkown stream data:${data.toString()}`);
