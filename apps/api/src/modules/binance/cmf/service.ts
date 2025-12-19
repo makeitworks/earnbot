@@ -135,7 +135,7 @@ export class BinanceCMFService {
   subscribeMiniTicker(symbols: string[], callback:(data: any) => void) {
     let payload: Record<string, any> = { params: [] };
     if(symbols.length <= 0) {
-      payload.params = [ `!${BinanceEnums.CMFWsApi.MINI_TICKER}@arr` ];
+      payload.params = [ `!${BinanceEnums.CMFWsApi.MINI_TICKER.ENDPOINT}@arr` ];
     } else {
       payload.params = symbols.map( symbol => `${symbol.toLowerCase()}@${BinanceEnums.CMFWsApi.MINI_TICKER}`)
     }

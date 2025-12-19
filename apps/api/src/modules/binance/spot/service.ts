@@ -117,7 +117,7 @@ export class BinanceSpotService {
   subscribeMiniTicker(symbols: string[], callback: (data: any)=> void) {
     let payload: Record<string, any> = { params: []};
     if(symbols.length <= 0) {
-      payload.params = [`!${BinanceEnums.SpotWsApi.MINI_TICKER}@arr`];
+      payload.params = [`!${BinanceEnums.SpotWsApi.MINI_TICKER.ENDPOINT}@arr`];
     } else {
       payload.params = symbols.map( symbol => `${symbol.toLowerCase()}@${BinanceEnums.SpotWsApi.MINI_TICKER.ENDPOINT}`)
     }

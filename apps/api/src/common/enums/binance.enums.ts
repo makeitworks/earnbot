@@ -195,7 +195,7 @@ export const CMFWsApi = {
   },
   // 精简ticker
   MINI_TICKER: {
-    NAME: 'miniTicker',
+    NAME: '24hrMiniTicker',
     ENDPOINT: 'miniTicker'
   }
 
