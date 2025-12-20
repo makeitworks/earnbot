@@ -15,9 +15,9 @@ import { RedisService } from '../../database/redis/redis.service';
 import * as RedisEnums from '../../common/enums/redis.enums';
 import { EventGateway } from '../event/event.gateway';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { SymbolPrice } from '../../common/dto/common.dto';
 import * as EventEnums from '../../common/enums/event.enums';
 import { sleepAWhile } from '../../common/utils/utils';
+
 
 @Injectable()
 export class MarketsService implements OnModuleInit {
@@ -49,42 +49,27 @@ export class MarketsService implements OnModuleInit {
    */
   @Cron(CronExpression.EVERY_5_SECONDS)
   async pushSymbolPrice() {
-    // let priceList : SymbolPrice[] = [];
-
-    // // 获取价格
-    // let spotKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_SPOT_BOOK_TICKER}:*`);
-    // await Promise.all(
-    //   spotKeys.map( async (key)=> {
-    //     let bookTicker = await this.redisService.getJson<BinanceSpotBookTicker>(key);
-    //     let price: SymbolPrice = {
-    //       symbol: bookTicker.s,
-    //       buy: bookTicker.B,
-    //       sell: bookTicker.a
-    //     };
-    //     priceList.push(price);
-    //   })
-    // )
-    // // 
-    // let cmfKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_CMF_BOOK_TICKER}:*`);
-    // await Promise.all(
-    //   cmfKeys.map(async (key)=> {
-    //     let bookTicker = await this.redisService.getJson<BinanceCMFBookTicker>(key);
-    //     let price: SymbolPrice = {
-    //       symbol: bookTicker.s,
-    //       buy: bookTicker.b,
-    //       sell: bookTicker.a
-    //     }
-    //     priceList.push(price);
-    //   })
-    // )
-    // this.eventGateway.broadcast(EventEnums.EventNameEnum.SYMBOL_PRICE, priceList);
-    let marketData: Record<string, any> = {}
-
     // 获取现货Mini Ticker数据
-    let spot
+    let spotTickers: BinanceSpotMiniTicker[] = [];
+    let spotSymbolKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_SPOT_MINI_TICKER}:*`);
+    await Promise.all(
+      spotSymbolKeys.map(async key => {
+        let ticker = await this.redisService.getJson<BinanceSpotMiniTicker>(key);
+        spotTickers.push(ticker);
+      })
+    );
 
     // 获取Coin-Margin 合约 Mini Ticker 数据
+    let cmfTickers : BinanceCMFMiniTicker[] = [];
+    let cmfSymbolKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_CMF_MINI_TICKER}:*`);
+    await Promise.all(
+      cmfSymbolKeys.map( async key => {
+        let ticker = await this.redisService.getJson<BinanceCMFMiniTicker>(key);
+        cmfTickers.push(ticker);
+      })
+    );
 
+    this.eventGateway.broadcast(EventEnums.EventNameEnum.MINI_TICKER, { spotTickers, cmfTickers });
   }
 
   /**
