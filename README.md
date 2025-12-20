@@ -7,3 +7,11 @@
 
 ### todolist
 - 认证功能 ( 客户端 通过REST API 认证后，再通过Websocket发送 `auth` 消息，payload 是 `token`, 后端再将 用户id与socketid绑定)
+
+
+### 前端技术栈
+- Next.js (App Router)
+- TypeScript
+- Tailwind + shadcn/ui
+- TanStack Query
+- WebSocket
