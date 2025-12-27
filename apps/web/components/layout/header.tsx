@@ -7,6 +7,8 @@ import {
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 
+import { AuthDialog } from '../auth/auth-dialog';
+
 export function Header() {
   return (
     <header className='w-full border-b bg-background'>
@@ -19,7 +21,7 @@ export function Header() {
         {/* 中间导航菜单 */}
         <NavigationMenu>
           <NavigationMenuList>
-
+            
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                   <Link href='/'>Home</Link>
@@ -49,8 +51,7 @@ export function Header() {
 
         {/* 右侧 用户/登陆 */}
         <div className='flex items-center gap-2'>
-          <Button variant='ghost'>Login</Button>
-          <Button>Register</Button>
+          <AuthDialog />
         </div>
       </div>
     </header>
