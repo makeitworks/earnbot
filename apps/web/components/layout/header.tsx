@@ -1,5 +1,5 @@
+'use client';
 import Link from 'next/link';
-import { Button} from '@/components/ui/button';
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -8,8 +8,17 @@ import {
 } from '@/components/ui/navigation-menu';
 
 import { AuthDialog } from '../auth/auth-dialog';
+import { UserMenu } from '../user/user-menu';
+import { useEffect, useState } from 'react';
 
 export function Header() {
+
+  const [isLogin, setIsLogin] = useState(false);
+  useEffect(()=> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token"): null;
+    setIsLogin(!!token);
+  },[])
+
   return (
     <header className='w-full border-b bg-background'>
       <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4'>
@@ -51,7 +60,7 @@ export function Header() {
 
         {/* 右侧 用户/登陆 */}
         <div className='flex items-center gap-2'>
-          <AuthDialog />
+          { isLogin ? (<UserMenu />) : (<AuthDialog />) }
         </div>
       </div>
     </header>

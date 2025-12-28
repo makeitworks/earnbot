@@ -67,7 +67,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
 
     try {
       const res = await signInApi({email, password});
-      localStorage.setItem("token", res.accessToken);
+      localStorage.setItem("token", res.token);
       onSuccess();
     } catch(err: any) {
       setError(err.message || "登录失败");
