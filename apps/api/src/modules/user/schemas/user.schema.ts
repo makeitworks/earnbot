@@ -9,7 +9,7 @@ export class User {
     @Prop({ type: String, minLength: 2, maxLength: 30, unique: true })
     name: string;
 
-    @Prop({ type: String, required: true })
+    @Prop({ type: String, required: true, unique: true })
     email: string;
 
     @Prop()

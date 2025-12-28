@@ -2,6 +2,6 @@ import { UserResponseDto } from "../../user/dto/user-response.dto";
 
 
 export class SignInResponseDto {
-  accessToken: string;
+  token: string;
   user: UserResponseDto;
 }
