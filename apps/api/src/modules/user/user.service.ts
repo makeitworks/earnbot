@@ -18,4 +18,5 @@ export class UserService {
     async createUser(email: string, name: string, password: string) {
         return this.userModel.create({ name, email, password });
     }
+
 }

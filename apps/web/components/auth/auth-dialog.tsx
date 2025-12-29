@@ -14,6 +14,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { signInApi, signUpApi } from "@/lib/api/auth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { StateKeys } from "@/lib/state-key";
+
 
 export function AuthDialog() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -54,26 +57,28 @@ export function AuthDialog() {
 }
 
 function SignInForm({ onSuccess }: { onSuccess: () => void }) {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: signInApi,
+    onSuccess: (res) => {
+      localStorage.setItem("token", res.token);
+      
+      queryClient.invalidateQueries({ queryKey: [StateKeys.USER_DATA] });
+
+      onSuccess();
+    },
+    onError: (error: any) => {
+      console.log(error);
+    }
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await signInApi({email, password});
-      localStorage.setItem("token", res.token);
-      onSuccess();
-    } catch(err: any) {
-      setError(err.message || "登录失败");
-    } finally {
-      setLoading(false);
-    }
+    mutation.mutate({ email, password });
   }
 
   return (
@@ -84,13 +89,13 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div>
         <Label>Password</Label>
-        <Input type="password" value={password} onChange={(e)=> setPassword(e.target.value)} placeholder="your password" />
+        <Input type="password" value={password} onChange={(e)=> setPassword(e.target.value)} placeholder="password" />
       </div>
 
-      { error && <p className="text-sm text-red-500">{error}</p> }
+      { mutation.isError && <p className="text-sm text-red-500">{ (mutation.error as any)?.message || 'signin failed' }</p> }
 
-      <Button className="w-full" disabled={loading} >
-        {loading ? "Sigining...": "SignIn"}
+      <Button className="w-full" disabled={mutation.isPending} >
+        {mutation.isPending ? "Sigining...": "SignIn"}
       </Button>
     </form>
   )
@@ -100,22 +105,21 @@ function SignUpForm({ onSuccess}: { onSuccess: ()=> void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  
+  const mutation = useMutation({
+    mutationFn: signUpApi,
+    onSuccess: (res) => {
+      console.log('signUp success: ', res);
+      onSuccess();
+    },
+    onError: (error: any) => {
+      console.log(error);
+    },
+  })
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await signUpApi({name, email, password});
-      onSuccess();
-    } catch(err: any) {
-      setError(err.message || "注册失败");
-    } finally {
-      setLoading(false);
-    }
+    mutation.mutate({ name, email, password });
   }
 
   return (
@@ -132,9 +136,9 @@ function SignUpForm({ onSuccess}: { onSuccess: ()=> void }) {
         <Label>Password</Label>
         <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="your password" />
       </div>
-      { error && <p className="text-sm text-red-500">{error}</p> }
-      <Button className="w-full" disabled={loading}>
-        { loading ? "Signing Up ....": "Sign Up"}
+      { mutation.isError && <p className="text-sm text-red-500">{ (mutation.error as any)?.message || 'signup failed'}</p> }
+      <Button className="w-full" disabled={mutation.isPending}>
+        { mutation.isPending ? "Signing Up ....": "Sign Up"}
       </Button>
     </form>
   )

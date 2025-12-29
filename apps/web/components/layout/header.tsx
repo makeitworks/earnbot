@@ -9,15 +9,17 @@ import {
 
 import { AuthDialog } from '../auth/auth-dialog';
 import { UserMenu } from '../user/user-menu';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { StateKeys } from '@/lib/state-key';
+import { getProfile } from '@/lib/api/user';
 
 export function Header() {
 
-  const [isLogin, setIsLogin] = useState(false);
-  useEffect(()=> {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token"): null;
-    setIsLogin(!!token);
-  },[])
+  const { data: user, isLoading, isError} = useQuery({
+    queryKey: [StateKeys.USER_DATA],
+    queryFn: getProfile,
+    retry: false,
+  })
 
   return (
     <header className='w-full border-b bg-background'>
@@ -48,19 +50,13 @@ export function Header() {
                 <Link href='/robots'>Robots</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
-
-            {/* <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link href='/about'>About Us</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem> */}
-
+            
           </NavigationMenuList>
         </NavigationMenu>
 
         {/* 右侧 用户/登陆 */}
         <div className='flex items-center gap-2'>
-          { isLogin ? (<UserMenu />) : (<AuthDialog />) }
+          { isLoading ? null: user ? (<UserMenu />) : (<AuthDialog />) }
         </div>
       </div>
     </header>
