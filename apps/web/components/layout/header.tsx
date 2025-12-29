@@ -45,15 +45,15 @@ export function Header() {
 
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href='/strategy'>Strategy</Link>
+                <Link href='/robots'>Robots</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
+            {/* <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <Link href='/about'>About Us</Link>
               </NavigationMenuLink>
-            </NavigationMenuItem>
+            </NavigationMenuItem> */}
 
           </NavigationMenuList>
         </NavigationMenu>

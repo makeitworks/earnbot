@@ -5,6 +5,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Link from "next/link"
 
 
 export function UserMenu() {
@@ -20,7 +21,9 @@ export function UserMenu() {
             </DropdownMenuTrigger>
             
             <DropdownMenuContent align="end">
-                <DropdownMenuItem>profile</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>logout</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
