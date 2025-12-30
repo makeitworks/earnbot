@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { BinanceSpotService } from '../binance/spot/service';
 import { BinanceCMFService } from '../binance/cmf/service';
 import {
@@ -17,6 +17,7 @@ import { EventGateway } from '../event/event.gateway';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as EventEnums from '../../common/enums/event.enums';
 import { sleepAWhile } from '../../common/utils/utils';
+import { ExchangeEnum, PairTypeEnum } from '../../common/enums/exchange.enums';
 
 
 @Injectable()
@@ -44,11 +45,9 @@ export class MarketsService implements OnModuleInit {
     );
   }
 
-  /**
-   * 向客户端推送价格信息
-   */
+
   @Cron(CronExpression.EVERY_5_SECONDS)
-  async pushSymbolPrice() {
+  async binancePushSpotPrice() {
     // 获取现货Mini Ticker数据
     let spotTickers: BinanceSpotMiniTicker[] = [];
     let spotSymbolKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_SPOT_MINI_TICKER}:*`);
@@ -59,7 +58,12 @@ export class MarketsService implements OnModuleInit {
       })
     );
 
-    // 获取Coin-Margin 合约 Mini Ticker 数据
+    this.eventGateway.broadcast(EventEnums.EventNameEnum.BINANCE_MINI_TICKER_SPOT, { data: spotTickers });
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async binancePushCMFPrice() {
+     // 获取Coin-Margin 合约 Mini Ticker 数据
     let cmfTickers : BinanceCMFMiniTicker[] = [];
     let cmfSymbolKeys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_CMF_MINI_TICKER}:*`);
     await Promise.all(
@@ -68,9 +72,9 @@ export class MarketsService implements OnModuleInit {
         cmfTickers.push(ticker);
       })
     );
-
-    this.eventGateway.broadcast(EventEnums.EventNameEnum.MINI_TICKER, { spotTickers, cmfTickers });
+    this.eventGateway.broadcast(EventEnums.EventNameEnum.BINANCE_MINI_TICEKR_CMF, { data: cmfTickers });
   }
+
 
   /**
    * 现货行情数据websocket连接开启
@@ -199,6 +203,56 @@ export class MarketsService implements OnModuleInit {
    */
   onSpotDepthCallback(data: BinanceSpotDepth) {
     // this.redisService.setJson(`${RedisEnums.KeyPrefix.BINANCE_SPOT_DEPTH}:${data}`, data, RedisEnums.KeyDefaultExpireInSec);
+  }
+
+
+  /**
+   * 获取交易对
+   */
+  async getTradingPairs(exchange: ExchangeEnum, pairType: PairTypeEnum) {
+    if(exchange === ExchangeEnum.BINANCE) {
+      if(pairType === PairTypeEnum.SPOT) {
+        let spotSymbolList: BinanceSpotSymbolInfo[] = [];
+
+        let keys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_SPOT_SYMBOL}:*`);
+        await Promise.all(
+          keys.map( async(key: string) => {
+            let symbolInfo = await this.redisService.getJson<BinanceSpotSymbolInfo>(key);
+            spotSymbolList.push(symbolInfo);
+          })
+        )
+
+        return {
+          data: spotSymbolList
+        }
+      } else if (pairType === PairTypeEnum.CMF) {
+        let cmfSymbolList : BinanceCMFSymbolInfo[] = [];
+        let keys = await this.redisService.scan(`${RedisEnums.KeyPrefix.BINANCE_CMF_SYMBOL}:*`);
+        await Promise.all(
+          keys.map( async(key: string) => {
+            let symbolInfo = await this.redisService.getJson<BinanceCMFSymbolInfo>(key);
+            cmfSymbolList.push(symbolInfo);
+          } )
+        );
+        
+        return {
+          data: cmfSymbolList
+        }
+      } else {
+        throw new BadRequestException();
+      }
+
+    } else if(exchange === ExchangeEnum.OKX) {
+      if(pairType === PairTypeEnum.SPOT) {
+
+      } else if (pairType === PairTypeEnum.CMF) {
+
+      } else {
+        throw new BadRequestException();
+      }
+    } else {
+      throw new BadRequestException();
+    }
   }
 
 }

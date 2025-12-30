@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Header } from "@/components/layout/header";
-import Head from "next/head";
-import { Providers } from "./provider";
+import { MarketSocketProvider } from "./market-websocket-provider";
+import { QueryProviders } from "./query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,15 +26,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <QueryProviders >
+          <MarketSocketProvider />
           <Header />
           {children}
-        </Providers>
+        </QueryProviders>
       </body>
     </html>
   );

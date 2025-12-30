@@ -1,6 +1,6 @@
 
 
 export enum EventNameEnum {
-    SYMBOL_PRICE = 'symbolPrice',
-    MINI_TICKER = 'miniTicker',
+    BINANCE_MINI_TICKER_SPOT = 'binance_miniTicker_spot',
+    BINANCE_MINI_TICEKR_CMF = 'binance_miniTicker_cmf',
 }
