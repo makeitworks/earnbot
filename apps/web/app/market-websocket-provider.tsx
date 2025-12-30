@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { getMarketSocket } from "@/lib/socket";
 import { useQueryClient } from "@tanstack/react-query";
-import { WSEvents } from "@/lib/websocket-events";
-import { ExChangeEnum, StateKey } from "@/lib/common";
-import { json } from "stream/consumers";
+
+import { ExChangeEnum, StateKey, WSEvents } from "@/lib/common";
+import { getMarketSocket } from "@/lib/market-socket";
 
 export function MarketSocketProvider() {
   const queryClient = useQueryClient();
